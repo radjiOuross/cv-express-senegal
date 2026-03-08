@@ -194,13 +194,10 @@ const PreviewPage = () => {
                 transition={{ duration: 0.25 }}
                 ref={cvRef}
               >
-                {template === "classique" && <CVClassique {...cvProps} />}
-                {template === "moderne" && <CVModerne {...cvProps} />}
-                {template === "minimaliste" && <CVMinimaliste {...cvProps} />}
-                {template === "elegant" && <CVElegant {...cvProps} />}
-                {template === "audacieux" && <CVAudacieux {...cvProps} />}
-                {template === "nature" && <CVNature {...cvProps} />}
-                {template === "corporate" && <CVCorporate {...cvProps} />}
+                {template === "executive" && <CVExecutive {...cvProps} />}
+                {template === "creative" && <CVCreative {...cvProps} />}
+                {template === "prestige" && <CVPrestige {...cvProps} />}
+                {template === "tech" && <CVTech {...cvProps} />}
               </motion.div>
             </AnimatePresence>
           </div>
