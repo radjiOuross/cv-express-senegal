@@ -14,40 +14,18 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
   const [processing, setProcessing] = useState(false);
   const recognitionRef = useRef<any>(null);
 
-  const startListening = async () => {
+  const startListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast({
         title: "Non supporté",
-        description: "La reconnaissance vocale nécessite Chrome ou Edge. Essaie avec un de ces navigateurs.",
+        description: "La reconnaissance vocale nécessite Chrome ou Edge.",
         variant: "destructive",
       });
       return;
     }
 
-    // Request microphone permission explicitly first (must be in click handler)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop the stream immediately — we only needed to trigger the permission
-      stream.getTracks().forEach((track) => track.stop());
-    } catch (err: any) {
-      console.error("Microphone permission error:", err);
-      if (err.name === "NotAllowedError") {
-        toast({
-          title: "Accès au micro refusé",
-          description: "Autorise l'accès au microphone dans les paramètres de ton navigateur, puis réessaie.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erreur micro",
-          description: "Impossible d'accéder au microphone. Vérifie qu'un micro est connecté.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
+    // Create and start recognition DIRECTLY in click handler — no await before this
     const recognition = new SpeechRecognition();
     recognition.lang = "fr-FR";
     recognition.continuous = false;
@@ -56,29 +34,32 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
     recognitionRef.current = recognition;
 
     recognition.onstart = () => {
+      console.log("SpeechRecognition started");
       setListening(true);
     };
 
     recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
+      console.error("SpeechRecognition error:", event.error, event.message);
       setListening(false);
-      
+
       const messages: Record<string, string> = {
         "not-allowed": "Autorise l'accès au microphone dans ton navigateur.",
         "no-speech": "Aucune voix détectée. Parle plus fort et réessaie.",
-        "audio-capture": "Aucun microphone détecté. Vérifie ta connexion.",
-        "network": "Erreur réseau. Vérifie ta connexion internet.",
+        "audio-capture": "Aucun microphone détecté.",
+        "network": "Erreur réseau. Ouvre l'app dans un nouvel onglet (pas dans l'iframe).",
         "aborted": "Écoute annulée.",
+        "service-not-available": "Service indisponible. Ouvre l'app dans un nouvel onglet Chrome.",
       };
 
       toast({
         title: "Erreur vocale",
-        description: messages[event.error] || `Erreur: ${event.error}. Réessaie.`,
+        description: messages[event.error] || `Erreur: ${event.error}`,
         variant: "destructive",
       });
     };
 
     recognition.onend = () => {
+      console.log("SpeechRecognition ended");
       setListening(false);
     };
 
@@ -92,25 +73,25 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
         const { data, error } = await supabase.functions.invoke("ai-voice-parse", {
           body: { transcript, type },
         });
-        
+
         if (error) {
           console.error("AI voice parse error:", error);
           throw error;
         }
-        
-        if (data?.parsed && Object.keys(data.parsed).some((k) => data.parsed[k])) {
+
+        if (data?.parsed && Object.values(data.parsed).some((v) => v)) {
           onResult(data.parsed);
           toast({ title: "✅ Champs remplis automatiquement !" });
         } else {
           toast({
             title: "Aucune info extraite",
-            description: "Essaie de parler plus clairement. Ex: 'Je m'appelle Amadou Diallo, je cherche un poste de développeur à Dakar'",
+            description: "Essaie : 'Je m'appelle Amadou Diallo, développeur web à Dakar'",
           });
         }
       } catch {
         toast({
           title: "Erreur",
-          description: "Une erreur est survenue lors de l'analyse. Réessaie dans quelques secondes.",
+          description: "Erreur lors de l'analyse. Réessaie.",
           variant: "destructive",
         });
       } finally {
@@ -118,23 +99,21 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
       }
     };
 
-    // Start recognition directly in the click handler chain
+    // CRITICAL: Start immediately in the click handler — no async before this
     try {
       recognition.start();
     } catch (err) {
       console.error("Recognition start error:", err);
       toast({
         title: "Erreur",
-        description: "Impossible de démarrer l'écoute. Réessaie.",
+        description: "Impossible de démarrer l'écoute. Ouvre l'app dans un nouvel onglet.",
         variant: "destructive",
       });
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
+    recognitionRef.current?.stop();
     setListening(false);
   };
 
@@ -143,17 +122,17 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
       <button
         onClick={listening ? stopListening : startListening}
         disabled={processing}
-        className="inline-flex items-center gap-2 text-sm text-primary font-medium hover:underline disabled:opacity-50"
         type="button"
+        className="inline-flex items-center gap-2 text-sm text-primary font-medium hover:underline disabled:opacity-50"
       >
         {processing ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : listening ? (
-          <MicOff className="w-4 h-4" />
+          <MicOff className="w-4 h-4 text-destructive" />
         ) : (
           <Mic className="w-4 h-4" />
         )}
-        {listening ? "Arrêter l'écoute" : processing ? "Analyse en cours..." : "🎤 Remplir vocalement"}
+        {listening ? "Arrêter" : processing ? "Analyse..." : "🎤 Remplir vocalement"}
       </button>
       <AnimatePresence>
         {listening && (
