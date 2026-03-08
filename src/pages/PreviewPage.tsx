@@ -11,7 +11,7 @@ import CVExecutive from "@/components/cv/CVExecutive";
 import CustomizationPanel from "@/components/CustomizationPanel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
-import { Download, FileText, Mail, Search, Palette, Loader2 } from "lucide-react";
+import { Download, FileText, Mail, Search, Palette, Loader2, Video } from "lucide-react";
 import { toast } from "sonner";
 
 const TEMPLATES = [
