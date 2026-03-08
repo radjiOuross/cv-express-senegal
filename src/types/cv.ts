@@ -54,7 +54,7 @@ export interface AIData {
   langues: { langue: string; niveau: string }[];
 }
 
-export type TemplateName = "classique" | "moderne" | "minimaliste";
+export type TemplateName = "classique" | "moderne" | "minimaliste" | "elegant" | "audacieux" | "nature" | "corporate";
 
 export const SENEGAL_CITIES = [
   "Dakar", "Thiès", "Saint-Louis", "Kaolack", "Ziguinchor",
