@@ -44,6 +44,120 @@ export type Database = {
         }
         Relationships: []
       }
+      validation_requests: {
+        Row: {
+          created_at: string
+          cv_id: string
+          id: string
+          skill: string
+          status: string
+          validator_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          cv_id: string
+          id?: string
+          skill: string
+          status?: string
+          validator_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          cv_id?: string
+          id?: string
+          skill?: string
+          status?: string
+          validator_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validation_requests_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cvs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "validation_requests_validator_id_fkey"
+            columns: ["validator_id"]
+            isOneToOne: false
+            referencedRelation: "validators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      validations: {
+        Row: {
+          comment: string | null
+          created_at: string
+          cv_id: string
+          id: string
+          skill_validated: string
+          validator_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          cv_id: string
+          id?: string
+          skill_validated: string
+          validator_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          cv_id?: string
+          id?: string
+          skill_validated?: string
+          validator_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validations_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cvs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "validations_validator_id_fkey"
+            columns: ["validator_id"]
+            isOneToOne: false
+            referencedRelation: "validators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      validators: {
+        Row: {
+          avatar_url: string | null
+          company: string
+          id: string
+          linkedin: string
+          name: string
+          title: string
+          verified: boolean
+        }
+        Insert: {
+          avatar_url?: string | null
+          company: string
+          id?: string
+          linkedin: string
+          name: string
+          title: string
+          verified?: boolean
+        }
+        Update: {
+          avatar_url?: string | null
+          company?: string
+          id?: string
+          linkedin?: string
+          name?: string
+          title?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
