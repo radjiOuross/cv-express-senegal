@@ -11,7 +11,7 @@ import CVExecutive from "@/components/cv/CVExecutive";
 import CustomizationPanel from "@/components/CustomizationPanel";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
-import { Download, FileText, Mail, Search, Palette, Loader2 } from "lucide-react";
+import { Download, FileText, Mail, Search, Palette, Loader2, Video } from "lucide-react";
 import { toast } from "sonner";
 
 const TEMPLATES = [
@@ -158,6 +158,12 @@ const PreviewPage = () => {
             className="bg-accent text-accent-foreground rounded-lg flex items-center gap-2 px-4 py-3 font-medium hover:brightness-95 transition"
           >
             <Mail className="w-4 h-4" /> Lettre de motivation
+          </button>
+          <button
+            onClick={() => navigate("/video-cv/script")}
+            className="bg-accent text-accent-foreground rounded-lg flex items-center gap-2 px-4 py-3 font-medium hover:brightness-95 transition"
+          >
+            <Video className="w-4 h-4" /> 🎥 Créer ma vidéo
           </button>
           <button
             onClick={() => navigate("/creer")}
