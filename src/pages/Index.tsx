@@ -168,6 +168,9 @@ const Index = () => {
               <button onClick={() => navigate("/importer")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
                 <Upload className="w-5 h-5" /> Importer un CV existant
               </button>
+              <button onClick={() => navigate("/video-cv/script")} className="px-8 py-4 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold hover:bg-primary/10 transition-all flex items-center justify-center gap-2">
+                <Video className="w-5 h-5" /> 🎥 CV Vidéo
+              </button>
             </div>
           </motion.div>
 
