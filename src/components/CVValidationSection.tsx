@@ -25,7 +25,7 @@ const CVValidationSection = ({ cvId, skills, validations, onRequestSent }: Props
     if (!selectedSkill || !cvId) return;
     setSending(true);
     try {
-      await supabase.from("validation_requests").insert({
+      await (supabase as any).from("validation_requests").insert({
         cv_id: cvId,
         skill: selectedSkill,
         status: "pending",

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,7 +26,7 @@ const ValidatePage = () => {
     if (!linkedinUrl.trim()) return;
     setLoading(true);
     try {
-      const { data } = await supabase.from("validators").select("id").eq("linkedin", linkedinUrl).maybeSingle();
+      const { data } = await (supabase as any).from("validators").select("id").eq("linkedin", linkedinUrl).maybeSingle();
       if (data) {
         setValidatorId(data.id);
         setLoggedIn(true);
@@ -42,19 +42,19 @@ const ValidatePage = () => {
   };
 
   const loadRequests = async () => {
-    const { data } = await supabase.from("validation_requests").select("*").eq("status", "pending");
-    if (data) setRequests(data);
+    const { data } = await (supabase as any).from("validation_requests").select("*").eq("status", "pending");
+    if (data) setRequests(data as ValidationRequest[]);
   };
 
   const validate = async (reqId: string, skill: string, cvId: string) => {
     try {
-      await supabase.from("validations").insert({
+      await (supabase as any).from("validations").insert({
         cv_id: cvId,
         validator_id: validatorId!,
         skill_validated: skill,
         comment: comment[reqId] || "",
       });
-      await supabase.from("validation_requests").update({ status: "validated", validator_id: validatorId }).eq("id", reqId);
+      await (supabase as any).from("validation_requests").update({ status: "validated", validator_id: validatorId }).eq("id", reqId);
       toast({ title: "✅ Compétence validée !" });
       loadRequests();
     } catch {
