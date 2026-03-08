@@ -39,6 +39,24 @@ const DashboardPage = () => {
     if (user) loadCVs();
   }, [user]);
 
+  useEffect(() => {
+    if (user && cvs.length > 0) {
+      const latestCv = cvs[0];
+      const slug = (latestCv as any).profile_slug;
+      setProfileSlug(slug || "");
+      setHasVideo(!!(latestCv as any).video_url);
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      supabase
+        .from("profile_views")
+        .select("*", { count: "exact", head: true })
+        .eq("cv_id", latestCv.id)
+        .gte("viewed_at", weekAgo.toISOString())
+        .then(({ count }) => setViewCount(count || 0));
+    }
+  }, [user, cvs]);
+
   const loadCVs = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -56,7 +74,6 @@ const DashboardPage = () => {
   };
 
   const openCV = (cv: CVRow) => {
-    // Load form data and AI data into localStorage for preview
     const formData = cv.form_data as FormData;
     saveFormData(formData);
     if (cv.ai_data) {
@@ -70,6 +87,15 @@ const DashboardPage = () => {
     navigate("/");
   };
 
+  const copyProfileLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/profil/${profileSlug}`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
+  const userAvatar = user?.user_metadata?.avatar_url;
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -77,11 +103,6 @@ const DashboardPage = () => {
       </div>
     );
   }
-
-  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
-  const userAvatar = user?.user_metadata?.avatar_url;
-
-
 
   useEffect(() => {
     if (user && cvs.length > 0) {
