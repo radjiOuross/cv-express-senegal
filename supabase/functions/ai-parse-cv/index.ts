@@ -19,10 +19,25 @@ serve(async (req) => {
     const userContent: any[] = [
       {
         type: "text",
-        text: `Tu es un expert RH sénégalais. Analyse ce CV uploadé et:
-1. Extrais TOUTES les données structurées (nom, prénom, poste, email, téléphone, ville, formations, expériences, compétences, langues, centres d'intérêt)
-2. Évalue la qualité du CV (score sur 100)
-3. Donne des recommandations précises pour l'améliorer
+        text: `Tu es un extracteur de données de CV. Ta mission est d'extraire FIDÈLEMENT et EXACTEMENT les informations présentes sur ce CV, SANS RIEN MODIFIER, INVENTER ou REFORMULER.
+
+RÈGLES STRICTES :
+- Extrais les informations TELLES QUELLES, mot pour mot
+- NE MODIFIE PAS les noms, prénoms, emails, téléphones, adresses
+- NE MODIFIE PAS les intitulés de poste - copie exactement ce qui est écrit
+- NE MODIFIE PAS les compétences listées - copie la liste exacte du CV
+- N'INVENTE PAS de compétences supplémentaires, même si tu penses qu'elles sont pertinentes
+- Pour les expériences, copie les dates EXACTES (format original), l'entreprise EXACTE, le poste EXACT
+- Pour les descriptions d'expériences, copie le texte EXACT ou résume fidèlement sans ajouter d'informations
+- NE CHANGE PAS les niveaux de langue indiqués
+- Si une information n'est pas présente sur le CV, laisse le champ vide - N'INVENTE RIEN
+
+POUR LES RECOMMANDATIONS (champ "recommendations") :
+- C'est le SEUL endroit où tu peux donner ton avis d'expert RH
+- Suggère des améliorations de formulation (type "improvement")
+- Signale les sections manquantes (type "missing") 
+- Donne des conseils pratiques (type "tip")
+- Chaque recommandation doit être précise et actionnable
 
 Le fichier est: ${fileName} (${fileType})
 
@@ -53,7 +68,7 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
         messages: [
           {
             role: "system",
-            content: "Tu es un expert RH qui analyse des CV. Tu dois extraire les données et donner des recommandations. Utilise l'outil fourni pour structurer ta réponse.",
+            content: `Tu es un extracteur fidèle de données de CV. Tu ne modifies JAMAIS les informations du candidat. Tu copies exactement ce qui est sur le CV. Les recommandations sont le seul endroit où tu donnes ton expertise. Tu ne dois JAMAIS inventer des compétences, changer des intitulés de poste, modifier des contacts ou reformuler des expériences.`,
           },
           { role: "user", content: userContent },
         ],
@@ -62,32 +77,34 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
             type: "function",
             function: {
               name: "extract_cv_data",
-              description: "Extraire les données structurées d'un CV et fournir des recommandations",
+              description: "Extraire FIDÈLEMENT les données d'un CV sans rien modifier, et fournir des recommandations d'amélioration séparément",
               parameters: {
                 type: "object",
                 properties: {
-                  score: { type: "number", description: "Score de qualité du CV de 0 à 100" },
-                  summary: { type: "string", description: "Résumé court de l'évaluation du CV (2 phrases max)" },
+                  score: { type: "number", description: "Score de qualité du CV de 0 à 100 basé sur la présentation, la complétude et la clarté" },
+                  summary: { type: "string", description: "Résumé court de l'évaluation du CV (2 phrases max) - c'est TON évaluation, pas le résumé du candidat" },
                   personal: {
                     type: "object",
+                    description: "Informations personnelles EXACTES telles qu'elles apparaissent sur le CV",
                     properties: {
-                      prenom: { type: "string" },
-                      nom: { type: "string" },
-                      poste: { type: "string" },
-                      email: { type: "string" },
-                      telephone: { type: "string" },
-                      ville: { type: "string" },
+                      prenom: { type: "string", description: "Prénom EXACT du candidat" },
+                      nom: { type: "string", description: "Nom EXACT du candidat" },
+                      poste: { type: "string", description: "Intitulé de poste EXACT tel qu'écrit sur le CV" },
+                      email: { type: "string", description: "Email EXACT" },
+                      telephone: { type: "string", description: "Numéro de téléphone EXACT" },
+                      ville: { type: "string", description: "Ville/adresse EXACTE" },
                     },
                     required: ["prenom", "nom", "poste"],
                   },
                   diplomas: {
                     type: "array",
+                    description: "Formations EXACTES telles qu'elles apparaissent sur le CV",
                     items: {
                       type: "object",
                       properties: {
-                        diplome: { type: "string" },
-                        ecole: { type: "string" },
-                        annee: { type: "string" },
+                        diplome: { type: "string", description: "Intitulé EXACT du diplôme" },
+                        ecole: { type: "string", description: "Nom EXACT de l'établissement" },
+                        annee: { type: "string", description: "Année ou période EXACTE telle qu'écrite" },
                         mention: { type: "string" },
                       },
                       required: ["diplome", "ecole", "annee"],
@@ -95,21 +112,27 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
                   },
                   experiences: {
                     type: "array",
+                    description: "Expériences professionnelles EXACTES telles qu'elles apparaissent sur le CV",
                     items: {
                       type: "object",
                       properties: {
-                        poste: { type: "string" },
-                        entreprise: { type: "string" },
-                        dateDebut: { type: "string" },
-                        dateFin: { type: "string" },
-                        description: { type: "string" },
+                        poste: { type: "string", description: "Intitulé de poste EXACT tel qu'écrit sur le CV" },
+                        entreprise: { type: "string", description: "Nom EXACT de l'entreprise" },
+                        dateDebut: { type: "string", description: "Date de début EXACTE telle qu'écrite" },
+                        dateFin: { type: "string", description: "Date de fin EXACTE telle qu'écrite (ou 'Présent' / 'Actuel' si en cours)" },
+                        description: { type: "string", description: "Description EXACTE des missions telle qu'écrite sur le CV" },
                       },
                       required: ["poste", "entreprise"],
                     },
                   },
-                  skills: { type: "array", items: { type: "string" } },
+                  skills: { 
+                    type: "array", 
+                    items: { type: "string" },
+                    description: "Liste EXACTE des compétences telles qu'elles apparaissent sur le CV - NE PAS en ajouter"
+                  },
                   languages: {
                     type: "array",
+                    description: "Langues EXACTES telles qu'elles apparaissent sur le CV",
                     items: {
                       type: "object",
                       properties: {
@@ -119,15 +142,16 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
                       required: ["langue", "niveau"],
                     },
                   },
-                  interests: { type: "string" },
+                  interests: { type: "string", description: "Centres d'intérêt EXACTS tels qu'écrits sur le CV" },
                   recommendations: {
                     type: "array",
+                    description: "Tes recommandations d'expert pour AMÉLIORER le CV - c'est ici que tu donnes tes suggestions",
                     items: {
                       type: "object",
                       properties: {
-                        type: { type: "string", enum: ["improvement", "missing", "tip"] },
-                        section: { type: "string" },
-                        message: { type: "string" },
+                        type: { type: "string", enum: ["improvement", "missing", "tip"], description: "improvement = reformulation suggérée, missing = section/info manquante, tip = conseil pratique" },
+                        section: { type: "string", description: "La section du CV concernée" },
+                        message: { type: "string", description: "Ta recommandation détaillée et actionnable" },
                       },
                       required: ["type", "section", "message"],
                     },
@@ -172,7 +196,6 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
       throw new Error("Failed to parse tool call arguments");
     }
 
-    // Build FormData structure
     const formData = {
       personal: {
         prenom: parsed.personal?.prenom || "",
@@ -203,7 +226,6 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
       interests: parsed.interests || "",
     };
 
-    // Ensure at least one diploma/experience entry
     if (formData.diplomas.length === 0) {
       formData.diplomas = [{ id: crypto.randomUUID(), diplome: "", ecole: "", annee: "", mention: "" }];
     }
