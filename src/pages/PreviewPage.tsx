@@ -12,7 +12,9 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
 import CVValidationSection from "@/components/CVValidationSection";
 import CustomizationPanel from "@/components/CustomizationPanel";
-import { Download, FileText, Check, Mail, Search, Palette } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Download, FileText, Check, Mail, Search, Palette, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ const PreviewPage = () => {
   const aiDataRaw = localStorage.getItem("cvexpress_ai_data");
   const originalAiData: AIData | null = aiDataRaw ? JSON.parse(aiDataRaw) : null;
   const [aiData, setAiData] = useState<AIData | null>(originalAiData);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     saveCustomization(customization);
@@ -38,18 +41,49 @@ const PreviewPage = () => {
   }
 
   const handleDownload = async () => {
-    if (!cvRef.current) return;
-    const html2pdf = (await import("html2pdf.js")).default;
-    html2pdf()
-      .set({
-        margin: 0,
-        filename: `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      })
-      .from(cvRef.current)
-      .save();
+    if (downloading) return;
+    setDownloading(true);
+    
+    try {
+      toast.info("Génération du PDF en cours...");
+      
+      const { data, error } = await supabase.functions.invoke("reactive-resume-export", {
+        body: { formData, aiData, template, customization },
+      });
+
+      if (error) throw error;
+      if (!data?.pdfUrl) throw new Error("Aucun lien PDF reçu");
+
+      // Download the PDF
+      const link = document.createElement("a");
+      link.href = data.pdfUrl;
+      link.download = `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("CV téléchargé avec succès !");
+    } catch (err) {
+      console.error("Download error:", err);
+      toast.error("Erreur lors du téléchargement. Tentative avec le rendu local...");
+      
+      // Fallback to html2pdf
+      if (!cvRef.current) return;
+      const html2pdf = (await import("html2pdf.js")).default;
+      html2pdf()
+        .set({
+          margin: 0,
+          filename: `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        })
+        .from(cvRef.current)
+        .save();
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const templates: { key: TemplateName; label: string; colors: string[]; layout: string }[] = [
@@ -179,8 +213,9 @@ const PreviewPage = () => {
           </label>
         </div>
         <div className="flex gap-3 mb-8 flex-wrap">
-          <button onClick={handleDownload} className="btn-primary flex items-center justify-center gap-2 px-6 py-3">
-            <Download className="w-5 h-5" /> Télécharger PDF — 2000 FCFA
+          <button onClick={handleDownload} disabled={downloading} className="btn-primary flex items-center justify-center gap-2 px-6 py-3 disabled:opacity-60">
+            {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+            {downloading ? "Génération..." : "Télécharger PDF — 2000 FCFA"}
           </button>
           <button onClick={() => setPanelOpen(true)} className="btn-primary-sm flex items-center gap-2 bg-accent text-accent-foreground">
             <Palette className="w-4 h-4" /> 🎨 Personnaliser
