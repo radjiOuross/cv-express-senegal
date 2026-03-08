@@ -213,8 +213,9 @@ const PreviewPage = () => {
           </label>
         </div>
         <div className="flex gap-3 mb-8 flex-wrap">
-          <button onClick={handleDownload} className="btn-primary flex items-center justify-center gap-2 px-6 py-3">
-            <Download className="w-5 h-5" /> Télécharger PDF — 2000 FCFA
+          <button onClick={handleDownload} disabled={downloading} className="btn-primary flex items-center justify-center gap-2 px-6 py-3 disabled:opacity-60">
+            {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
+            {downloading ? "Génération..." : "Télécharger PDF — 2000 FCFA"}
           </button>
           <button onClick={() => setPanelOpen(true)} className="btn-primary-sm flex items-center gap-2 bg-accent text-accent-foreground">
             <Palette className="w-4 h-4" /> 🎨 Personnaliser
