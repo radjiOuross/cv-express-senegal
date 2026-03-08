@@ -14,46 +14,47 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const isImage = fileType.startsWith("image/");
-    const mimeType = fileType;
 
-    const userContent: any[] = [
-      {
-        type: "text",
-        text: `Tu es un extracteur de données de CV. Ta mission est d'extraire FIDÈLEMENT et EXACTEMENT les informations présentes sur ce CV, SANS RIEN MODIFIER, INVENTER ou REFORMULER.
+    const extractionPrompt = `RÔLE : Tu es un SCANNER/OCR. Tu COPIES le texte du CV, tu ne le réécris pas.
 
-RÈGLES STRICTES :
-- Extrais les informations TELLES QUELLES, mot pour mot
-- NE MODIFIE PAS les noms, prénoms, emails, téléphones, adresses
-- NE MODIFIE PAS les intitulés de poste - copie exactement ce qui est écrit
-- NE MODIFIE PAS les compétences listées - copie la liste exacte du CV
-- N'INVENTE PAS de compétences supplémentaires, même si tu penses qu'elles sont pertinentes
-- Pour les expériences, copie les dates EXACTES (format original), l'entreprise EXACTE, le poste EXACT
-- Pour les descriptions d'expériences, copie le texte EXACT ou résume fidèlement sans ajouter d'informations
-- NE CHANGE PAS les niveaux de langue indiqués
-- Si une information n'est pas présente sur le CV, laisse le champ vide - N'INVENTE RIEN
+INSTRUCTIONS ABSOLUES - VIOLATION = ÉCHEC :
 
-POUR LES RECOMMANDATIONS (champ "recommendations") :
-- C'est le SEUL endroit où tu peux donner ton avis d'expert RH
-- Suggère des améliorations de formulation (type "improvement")
-- Signale les sections manquantes (type "missing") 
-- Donne des conseils pratiques (type "tip")
-- Chaque recommandation doit être précise et actionnable
+1. COPIE EXACTE : Chaque donnée doit être IDENTIQUE à ce qui est écrit sur le CV.
+   - Si le CV dit "Développeur Full Stack", tu écris "Développeur Full Stack" (pas "Développeur Web", pas "Full-Stack Developer")
+   - Si le CV dit "+221 77 123 45 67", tu écris "+221 77 123 45 67" exactement
+   - Si le CV liste "React, Node.js, Python", tu listes ["React", "Node.js", "Python"] - RIEN DE PLUS
 
-Le fichier est: ${fileName} (${fileType})
+2. ZÉRO INVENTION : Tu ne dois JAMAIS :
+   - Ajouter des compétences qui ne sont pas listées
+   - Modifier un intitulé de poste
+   - Changer un nom d'entreprise
+   - Inventer une description de poste
+   - Ajouter des technologies non mentionnées
+   - Reformuler les missions/descriptions
 
-Utilise l'outil extract_cv_data pour retourner les données.`,
-      },
-    ];
+3. DATES : Copie les dates EXACTEMENT comme elles apparaissent.
+   - "Janvier 2020 - Présent" → dateDebut: "Janvier 2020", dateFin: "Présent"
+   - "2019-2022" → dateDebut: "2019", dateFin: "2022"
+   - "Depuis 2021" → dateDebut: "2021", dateFin: "Présent"
+
+4. CHAMPS VIDES : Si une info n'existe pas sur le CV, laisse le champ VIDE (""). N'invente RIEN.
+
+5. RECOMMANDATIONS : C'est le SEUL endroit où tu donnes ton expertise. Sois précis et utile.
+
+Fichier : ${fileName} (${fileType})`;
+
+    const userContent: any[] = [{ type: "text", text: extractionPrompt }];
 
     if (isImage) {
       userContent.push({
         type: "image_url",
-        image_url: { url: `data:${mimeType};base64,${fileBase64}` },
+        image_url: { url: `data:${fileType};base64,${fileBase64}` },
       });
     } else {
+      // For PDFs: send as document
       userContent.push({
-        type: "text",
-        text: `[Contenu du fichier en base64 - type: ${mimeType}]\n${fileBase64.substring(0, 50000)}`,
+        type: "image_url",
+        image_url: { url: `data:${fileType};base64,${fileBase64}` },
       });
     }
 
@@ -64,11 +65,11 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
-            content: `Tu es un extracteur fidèle de données de CV. Tu ne modifies JAMAIS les informations du candidat. Tu copies exactement ce qui est sur le CV. Les recommandations sont le seul endroit où tu donnes ton expertise. Tu ne dois JAMAIS inventer des compétences, changer des intitulés de poste, modifier des contacts ou reformuler des expériences.`,
+            content: `Tu es un SCANNER OCR. Tu extrais les données d'un CV SANS AUCUNE MODIFICATION. Tu copies mot pour mot. Tu n'ajoutes rien, tu ne reformules rien, tu ne corriges rien. Si une information n'est pas sur le CV, tu laisses le champ vide. Les recommandations sont le SEUL endroit où tu peux t'exprimer.`,
           },
           { role: "user", content: userContent },
         ],
@@ -77,34 +78,32 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
             type: "function",
             function: {
               name: "extract_cv_data",
-              description: "Extraire FIDÈLEMENT les données d'un CV sans rien modifier, et fournir des recommandations d'amélioration séparément",
+              description: "Scanner et copier fidèlement les données du CV",
               parameters: {
                 type: "object",
                 properties: {
-                  score: { type: "number", description: "Score de qualité du CV de 0 à 100 basé sur la présentation, la complétude et la clarté" },
-                  summary: { type: "string", description: "Résumé court de l'évaluation du CV (2 phrases max) - c'est TON évaluation, pas le résumé du candidat" },
+                  score: { type: "number", description: "Score de qualité 0-100" },
+                  summary: { type: "string", description: "Ton évaluation en 2 phrases (pas un résumé du CV)" },
                   personal: {
                     type: "object",
-                    description: "Informations personnelles EXACTES telles qu'elles apparaissent sur le CV",
                     properties: {
-                      prenom: { type: "string", description: "Prénom EXACT du candidat" },
-                      nom: { type: "string", description: "Nom EXACT du candidat" },
-                      poste: { type: "string", description: "Intitulé de poste EXACT tel qu'écrit sur le CV" },
-                      email: { type: "string", description: "Email EXACT" },
-                      telephone: { type: "string", description: "Numéro de téléphone EXACT" },
-                      ville: { type: "string", description: "Ville/adresse EXACTE" },
+                      prenom: { type: "string", description: "COPIE EXACTE du prénom" },
+                      nom: { type: "string", description: "COPIE EXACTE du nom" },
+                      poste: { type: "string", description: "COPIE EXACTE de l'intitulé de poste/titre" },
+                      email: { type: "string", description: "COPIE EXACTE de l'email" },
+                      telephone: { type: "string", description: "COPIE EXACTE du téléphone" },
+                      ville: { type: "string", description: "COPIE EXACTE de la ville/adresse" },
                     },
                     required: ["prenom", "nom", "poste"],
                   },
                   diplomas: {
                     type: "array",
-                    description: "Formations EXACTES telles qu'elles apparaissent sur le CV",
                     items: {
                       type: "object",
                       properties: {
-                        diplome: { type: "string", description: "Intitulé EXACT du diplôme" },
-                        ecole: { type: "string", description: "Nom EXACT de l'établissement" },
-                        annee: { type: "string", description: "Année ou période EXACTE telle qu'écrite" },
+                        diplome: { type: "string", description: "COPIE EXACTE du diplôme" },
+                        ecole: { type: "string", description: "COPIE EXACTE de l'école" },
+                        annee: { type: "string", description: "COPIE EXACTE de l'année/période" },
                         mention: { type: "string" },
                       },
                       required: ["diplome", "ecole", "annee"],
@@ -112,27 +111,25 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
                   },
                   experiences: {
                     type: "array",
-                    description: "Expériences professionnelles EXACTES telles qu'elles apparaissent sur le CV",
                     items: {
                       type: "object",
                       properties: {
-                        poste: { type: "string", description: "Intitulé de poste EXACT tel qu'écrit sur le CV" },
-                        entreprise: { type: "string", description: "Nom EXACT de l'entreprise" },
-                        dateDebut: { type: "string", description: "Date de début EXACTE telle qu'écrite" },
-                        dateFin: { type: "string", description: "Date de fin EXACTE telle qu'écrite (ou 'Présent' / 'Actuel' si en cours)" },
-                        description: { type: "string", description: "Description EXACTE des missions telle qu'écrite sur le CV" },
+                        poste: { type: "string", description: "COPIE EXACTE du poste" },
+                        entreprise: { type: "string", description: "COPIE EXACTE de l'entreprise" },
+                        dateDebut: { type: "string", description: "COPIE EXACTE de la date de début" },
+                        dateFin: { type: "string", description: "COPIE EXACTE de la date de fin" },
+                        description: { type: "string", description: "COPIE EXACTE de la description des missions" },
                       },
                       required: ["poste", "entreprise"],
                     },
                   },
-                  skills: { 
-                    type: "array", 
+                  skills: {
+                    type: "array",
                     items: { type: "string" },
-                    description: "Liste EXACTE des compétences telles qu'elles apparaissent sur le CV - NE PAS en ajouter"
+                    description: "COPIE EXACTE de la liste de compétences - NE PAS EN AJOUTER"
                   },
                   languages: {
                     type: "array",
-                    description: "Langues EXACTES telles qu'elles apparaissent sur le CV",
                     items: {
                       type: "object",
                       properties: {
@@ -142,16 +139,15 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
                       required: ["langue", "niveau"],
                     },
                   },
-                  interests: { type: "string", description: "Centres d'intérêt EXACTS tels qu'écrits sur le CV" },
+                  interests: { type: "string", description: "COPIE EXACTE des centres d'intérêt" },
                   recommendations: {
                     type: "array",
-                    description: "Tes recommandations d'expert pour AMÉLIORER le CV - c'est ici que tu donnes tes suggestions",
                     items: {
                       type: "object",
                       properties: {
-                        type: { type: "string", enum: ["improvement", "missing", "tip"], description: "improvement = reformulation suggérée, missing = section/info manquante, tip = conseil pratique" },
-                        section: { type: "string", description: "La section du CV concernée" },
-                        message: { type: "string", description: "Ta recommandation détaillée et actionnable" },
+                        type: { type: "string", enum: ["improvement", "missing", "tip"] },
+                        section: { type: "string" },
+                        message: { type: "string" },
                       },
                       required: ["type", "section", "message"],
                     },
@@ -184,10 +180,7 @@ Utilise l'outil extract_cv_data pour retourner les données.`,
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-
-    if (!toolCall) {
-      throw new Error("No tool call in AI response");
-    }
+    if (!toolCall) throw new Error("No tool call in AI response");
 
     let parsed;
     try {
