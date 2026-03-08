@@ -10,7 +10,7 @@ const STATUS_MESSAGES = [
   "Analyse de ton parcours...",
   "Optimisation des descriptions...",
   "Amélioration des compétences...",
-  "Création du CV sur Reactive Resume...",
+  "Mise en forme du CV...",
   "Finalisation du CV...",
 ];
 
@@ -35,7 +35,6 @@ const LoadingPage = () => {
       }
 
       try {
-        // Step 1: Generate AI-enhanced data
         const { data: genData, error: genError } = await supabase.functions.invoke("generate-cv", {
           body: { formData },
         });
@@ -45,34 +44,12 @@ const LoadingPage = () => {
         const aiData = genData?.aiData || null;
         localStorage.setItem("cvexpress_ai_data", JSON.stringify(aiData));
 
-        // Step 2: Import to Reactive Resume
-        const { data: rrData, error: rrError } = await supabase.functions.invoke("reactive-resume-export", {
-          body: {
-            action: "import",
-            formData,
-            aiData,
-            template: "azurill",
-            customization: null,
-          },
-        });
-
-        if (rrError) {
-          console.error("Reactive Resume import error:", rrError);
-          // Still continue - we'll handle this in preview
-        }
-
-        if (rrData?.resumeId) {
-          localStorage.setItem("cvexpress_rr_resume_id", rrData.resumeId);
-          localStorage.setItem("cvexpress_rr_slug", rrData.slug || "");
-          localStorage.setItem("cvexpress_rr_public_url", rrData.publicUrl || "");
-        }
-
         // Save to database
         await supabase.from("cvs").insert({
           email: formData.personal?.email || "",
           form_data: formData as unknown as import("@/integrations/supabase/types").Json,
           ai_data: aiData as import("@/integrations/supabase/types").Json,
-          template: "azurill",
+          template: "prestige",
           paid: false,
           ...(user ? { user_id: user.id } : {}),
         });
