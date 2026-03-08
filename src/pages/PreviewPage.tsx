@@ -106,6 +106,11 @@ const PreviewPage = () => {
     };
   }, []);
 
+  if (!formData?.personal?.prenom) {
+    navigate("/creer");
+    return null;
+  }
+
   const noRR = !resumeId;
 
   return (
