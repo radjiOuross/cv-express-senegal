@@ -12,6 +12,7 @@ import AnalysePage from "./pages/AnalysePage";
 import ValidatePage from "./pages/ValidatePage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import ImportCVPage from "./pages/ImportCVPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/importer" element={<ImportCVPage />} />
             <Route path="/creer" element={<FormPage />} />
             <Route path="/generation" element={<LoadingPage />} />
             <Route path="/apercu" element={<PreviewPage />} />

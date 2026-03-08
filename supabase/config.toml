@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.ai-translate-cv]
 verify_jwt = false
+
+[functions.ai-parse-cv]
+verify_jwt = false
