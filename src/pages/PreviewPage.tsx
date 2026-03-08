@@ -1,170 +1,139 @@
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { loadFormData } from "@/lib/storage";
-import { FormData, AIData, TemplateName } from "@/types/cv";
-import { CVCustomization, loadCustomization, saveCustomization } from "@/types/customization";
-import CVExecutive from "@/components/cv/CVExecutive";
-import CVCreative from "@/components/cv/CVCreative";
-import CVPrestige from "@/components/cv/CVPrestige";
-import CVTech from "@/components/cv/CVTech";
+import { FormData, AIData } from "@/types/cv";
+import { supabase } from "@/integrations/supabase/client";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
-import CVValidationSection from "@/components/CVValidationSection";
-import CustomizationPanel from "@/components/CustomizationPanel";
-import { supabase } from "@/integrations/supabase/client";
-import { Download, FileText, Check, Mail, Search, Palette, Loader2 } from "lucide-react";
+import { Download, FileText, Mail, Search, Loader2, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+
+const RR_TEMPLATES = [
+  { key: "azurill", label: "Azurill" },
+  { key: "bronzor", label: "Bronzor" },
+  { key: "chikorita", label: "Chikorita" },
+  { key: "darkrai", label: "Darkrai" },
+  { key: "ditgar", label: "Ditgar" },
+  { key: "ditto", label: "Ditto" },
+  { key: "gengar", label: "Gengar" },
+  { key: "glalie", label: "Glalie" },
+  { key: "kakuna", label: "Kakuna" },
+  { key: "lapras", label: "Lapras" },
+  { key: "leafish", label: "Leafish" },
+  { key: "nosepass", label: "Nosepass" },
+  { key: "onyx", label: "Onyx" },
+  { key: "pikachu", label: "Pikachu" },
+  { key: "rhyhorn", label: "Rhyhorn" },
+];
 
 const PreviewPage = () => {
   const navigate = useNavigate();
-  const [template, setTemplate] = useState<TemplateName>("executive");
+  const [template, setTemplate] = useState("azurill");
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("fr");
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [customization, setCustomization] = useState<CVCustomization>(loadCustomization);
-  const cvRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [changingTemplate, setChangingTemplate] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
 
   const formData = loadFormData() as FormData;
   const aiDataRaw = localStorage.getItem("cvexpress_ai_data");
   const originalAiData: AIData | null = aiDataRaw ? JSON.parse(aiDataRaw) : null;
   const [aiData, setAiData] = useState<AIData | null>(originalAiData);
-  const [downloading, setDownloading] = useState(false);
 
+  const resumeId = localStorage.getItem("cvexpress_rr_resume_id");
+  const publicUrl = localStorage.getItem("cvexpress_rr_public_url");
+
+  const handleChangeTemplate = useCallback(async (newTemplate: string) => {
+    if (!resumeId || newTemplate === template) return;
+    setChangingTemplate(true);
+    setTemplate(newTemplate);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("reactive-resume-export", {
+        body: { action: "change-template", resumeId, template: newTemplate },
+      });
+      if (error) throw error;
+
+      // Update public URL if returned
+      if (data?.publicUrl) {
+        localStorage.setItem("cvexpress_rr_public_url", data.publicUrl);
+      }
+
+      // Refresh iframe
+      setIframeKey((k) => k + 1);
+      toast.success(`Template "${newTemplate}" appliqué !`);
+    } catch (err) {
+      console.error("Template change error:", err);
+      toast.error("Erreur lors du changement de template");
+    } finally {
+      setChangingTemplate(false);
+    }
+  }, [resumeId, template]);
+
+  const handleDownload = async () => {
+    if (downloading || !resumeId) return;
+    setDownloading(true);
+
+    try {
+      toast.info("Génération du PDF...");
+      const { data, error } = await supabase.functions.invoke("reactive-resume-export", {
+        body: { action: "pdf", resumeId },
+      });
+      if (error) throw error;
+      if (!data?.pdfUrl) throw new Error("No PDF URL");
+
+      const link = document.createElement("a");
+      link.href = data.pdfUrl;
+      link.download = `CV_${formData.personal.prenom}_${formData.personal.nom}.pdf`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("CV téléchargé !");
+    } catch (err) {
+      console.error("Download error:", err);
+      toast.error("Erreur lors du téléchargement du PDF");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  // Cleanup on unmount
   useEffect(() => {
-    saveCustomization(customization);
-  }, [customization]);
+    return () => {
+      // Don't cleanup - user might come back
+    };
+  }, []);
 
   if (!formData?.personal?.prenom) {
     navigate("/creer");
     return null;
   }
 
-  const handleDownload = async () => {
-    if (downloading) return;
-    setDownloading(true);
-    
-    try {
-      toast.info("Génération du PDF en cours...");
-      
-      const { data, error } = await supabase.functions.invoke("reactive-resume-export", {
-        body: { formData, aiData, template, customization },
-      });
-
-      if (error) throw error;
-      if (!data?.pdfUrl) throw new Error("Aucun lien PDF reçu");
-
-      // Download the PDF
-      const link = document.createElement("a");
-      link.href = data.pdfUrl;
-      link.download = `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast.success("CV téléchargé avec succès !");
-    } catch (err) {
-      console.error("Download error:", err);
-      toast.error("Erreur lors du téléchargement. Tentative avec le rendu local...");
-      
-      // Fallback to html2pdf
-      if (!cvRef.current) return;
-      const html2pdf = (await import("html2pdf.js")).default;
-      html2pdf()
-        .set({
-          margin: 0,
-          filename: `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        })
-        .from(cvRef.current)
-        .save();
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const templates: { key: TemplateName; label: string; colors: string[]; layout: string }[] = [
-    { key: "executive", label: "Executive", colors: ["#fff", "#1B3A6B", "#eee"], layout: "executive" },
-    { key: "creative", label: "Creative", colors: ["#00A651", "#fff", "#f5f5f5"], layout: "creative" },
-    { key: "prestige", label: "Prestige", colors: ["#fff", "#C9A84C", "#333"], layout: "prestige" },
-    { key: "tech", label: "Tech", colors: ["#0f0f0f", "#00A651", "#161616"], layout: "tech" },
-  ];
-
-  const renderMiniPreview = (t: typeof templates[0]) => {
-    const [c1, c2, c3] = t.colors;
-    if (t.layout === "executive") {
-      return (<>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 3, backgroundColor: c2 }} />
-        <div style={{ position: "absolute", left: 10, top: 10, width: "50%", height: 5, backgroundColor: c2, borderRadius: 1 }} />
-        <div style={{ position: "absolute", left: 10, top: 22, width: "35%", height: 2, backgroundColor: "#ddd" }} />
-        <div style={{ position: "absolute", right: 8, top: 35, width: "25%", height: 50, backgroundColor: c3, borderRadius: 2 }} />
-      </>);
-    }
-    if (t.layout === "creative") {
-      return (<>
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c1 }} />
-        <div style={{ position: "absolute", left: "12%", top: 12, width: 16, height: 16, borderRadius: "50%", backgroundColor: "#fff" }} />
-        <div style={{ position: "absolute", right: 10, top: 14, width: "45%", height: 3, backgroundColor: c1, borderRadius: 1 }} />
-        <div style={{ position: "absolute", right: 10, top: 24, width: "40%", height: 2, backgroundColor: "#ddd" }} />
-      </>);
-    }
-    if (t.layout === "prestige") {
-      return (<>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 3, background: `linear-gradient(90deg, ${c2}, #ddd, ${c2})` }} />
-        <div style={{ position: "absolute", left: "25%", right: "25%", top: 14, height: 5, backgroundColor: c3, borderRadius: 1 }} />
-        <div style={{ position: "absolute", left: "30%", right: "30%", top: 24, height: 1, backgroundColor: c2 }} />
-        <div style={{ position: "absolute", left: 12, top: 35, width: 3, height: 50, backgroundColor: c2, borderRadius: 1 }} />
-      </>);
-    }
-    // tech
-    return (<>
-      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, right: 0, backgroundColor: c1 }} />
-      <div style={{ position: "absolute", left: 8, top: 10, width: "45%", height: 4, backgroundColor: c2, borderRadius: 1 }} />
-      <div style={{ position: "absolute", left: 8, top: 20, width: "35%", height: 2, backgroundColor: "#333" }} />
-      <div style={{ position: "absolute", right: 6, top: 34, width: "28%", height: 55, backgroundColor: c3, borderRadius: 4 }} />
-    </>);
-  };
-
-  const skills = aiData?.competences || formData.skills || [];
-
-  const cvProps = { formData, aiData, customization };
+  const noRR = !resumeId;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen bg-background">
-      {/* Customization Panel */}
-      <CustomizationPanel
-        open={panelOpen}
-        onClose={() => setPanelOpen(false)}
-        customization={customization}
-        onChange={setCustomization}
-      />
-
-      {/* Floating button */}
-      {!panelOpen && (
-        <motion.button
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          onClick={() => setPanelOpen(true)}
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-primary text-primary-foreground px-3 py-4 rounded-r-xl shadow-lg hover:brightness-110 transition-all flex flex-col items-center gap-1"
-        >
-          <Palette className="w-5 h-5" />
-          <span className="text-[9px] font-bold writing-vertical" style={{ writingMode: "vertical-lr" }}>Personnaliser</span>
-        </motion.button>
-      )}
-
-      <nav className="flex items-center justify-between px-6 md:px-12 py-5">
-        <span className="text-2xl font-bold text-primary tracking-tight cursor-pointer" onClick={() => navigate("/")}>CVExpress</span>
-        <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-          <Search className="w-4 h-4" /> Analyser une offre
-        </button>
+      <nav className="flex items-center justify-between px-6 md:px-12 py-5 border-b border-border">
+        <span className="text-2xl font-bold text-primary tracking-tight cursor-pointer" onClick={() => navigate("/")}>
+          CVExpress
+        </span>
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+            <Search className="w-4 h-4" /> Analyser une offre
+          </button>
+          {publicUrl && (
+            <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+              <ExternalLink className="w-4 h-4" /> Voir sur Reactive Resume
+            </a>
+          )}
+        </div>
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
         {/* Language Switcher */}
-        <div className="mb-4">
+        <div className="my-4">
           <LanguageSwitcher
             aiData={originalAiData}
             onTranslated={setAiData}
@@ -173,88 +142,104 @@ const PreviewPage = () => {
           />
         </div>
 
-        {/* Template selector */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Choisis ton template</h2>
-          <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "thin" }}>
-            {templates.map((t) => (
-              <button key={t.key} onClick={() => setTemplate(t.key)} className="flex-shrink-0 flex flex-col items-center gap-2 group">
-                <div className="relative rounded-lg overflow-hidden transition-all" style={{
-                  width: 80, height: 110,
-                  border: template === t.key ? "2.5px solid #00A651" : "2px solid #e5e5e5",
-                  boxShadow: template === t.key ? "0 0 0 2px rgba(0,166,81,0.2)" : "none",
-                  backgroundColor: t.colors[0] === "#fff" || t.colors[0] === "#fafafa" ? "#fafafa" : t.colors[0],
-                }}>
-                  {renderMiniPreview(t)}
-                  {template === t.key && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <span className={`text-xs font-medium ${template === t.key ? "text-primary" : "text-muted-foreground"}`}>{t.label}</span>
+        {/* Template Selector */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-foreground mb-3">Choisis ton template Reactive Resume</h2>
+          <div className="flex gap-2 overflow-x-auto pb-3" style={{ scrollbarWidth: "thin" }}>
+            {RR_TEMPLATES.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => handleChangeTemplate(t.key)}
+                disabled={changingTemplate}
+                className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                  template === t.key
+                    ? "bg-primary text-primary-foreground border-primary shadow-md"
+                    : "bg-card text-card-foreground border-border hover:border-primary/50"
+                } disabled:opacity-50`}
+              >
+                {t.label}
               </button>
             ))}
           </div>
+          {changingTemplate && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Changement de template...
+            </div>
+          )}
         </div>
 
-        {/* Photo toggle + Action buttons */}
-        <div className="flex items-center gap-3 mb-4">
-          <label className="flex items-center gap-2 cursor-pointer select-none bg-muted/60 rounded-lg px-4 py-2.5 border border-border">
-            <input
-              type="checkbox"
-              checked={customization.photoStyle !== "none"}
-              onChange={(e) => setCustomization(prev => ({ ...prev, photoStyle: e.target.checked ? "rounded" : "none" }))}
-              className="accent-primary w-4 h-4"
-            />
-            <span className="text-sm font-medium text-foreground">📷 Afficher la photo</span>
-          </label>
-        </div>
-        <div className="flex gap-3 mb-8 flex-wrap">
-          <button onClick={handleDownload} disabled={downloading} className="btn-primary flex items-center justify-center gap-2 px-6 py-3 disabled:opacity-60">
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-6 flex-wrap">
+          <button
+            onClick={handleDownload}
+            disabled={downloading || noRR}
+            className="bg-primary text-primary-foreground rounded-lg flex items-center justify-center gap-2 px-6 py-3 font-semibold hover:brightness-110 transition disabled:opacity-50"
+          >
             {downloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
-            {downloading ? "Génération..." : "Télécharger PDF — 2000 FCFA"}
+            {downloading ? "Génération..." : "Télécharger PDF"}
           </button>
-          <button onClick={() => setPanelOpen(true)} className="btn-primary-sm flex items-center gap-2 bg-accent text-accent-foreground">
-            <Palette className="w-4 h-4" /> 🎨 Personnaliser
+          <button
+            onClick={() => setIframeKey((k) => k + 1)}
+            className="bg-secondary text-secondary-foreground rounded-lg flex items-center gap-2 px-4 py-3 font-medium hover:brightness-95 transition"
+          >
+            <RefreshCw className="w-4 h-4" /> Rafraîchir
           </button>
-          <button onClick={() => setCoverLetterOpen(true)} className="btn-primary-sm flex items-center gap-2">
-            <Mail className="w-4 h-4" /> 💌 Lettre de motivation
+          <button
+            onClick={() => setCoverLetterOpen(true)}
+            className="bg-accent text-accent-foreground rounded-lg flex items-center gap-2 px-4 py-3 font-medium hover:brightness-95 transition"
+          >
+            <Mail className="w-4 h-4" /> Lettre de motivation
           </button>
-          <button onClick={() => navigate("/creer")} className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium flex items-center justify-center gap-2">
+          <button
+            onClick={() => navigate("/creer")}
+            className="bg-muted text-muted-foreground rounded-lg flex items-center gap-2 px-4 py-3 font-medium hover:brightness-95 transition"
+          >
             <FileText className="w-4 h-4" /> Modifier les infos
           </button>
         </div>
 
-        {/* CV Preview */}
-        <div className="flex justify-center">
-          <div className="shadow-2xl rounded-lg overflow-hidden" style={{ width: 794 }}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${template}-${currentLang}-${JSON.stringify(customization.colors)}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.25 }}
-                ref={cvRef}
-              >
-                {template === "executive" && <CVExecutive {...cvProps} />}
-                {template === "creative" && <CVCreative {...cvProps} />}
-                {template === "prestige" && <CVPrestige {...cvProps} />}
-                {template === "tech" && <CVTech {...cvProps} />}
-              </motion.div>
-            </AnimatePresence>
+        {/* CV Preview via iframe */}
+        {noRR ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-lg text-muted-foreground mb-4">
+              Le CV n'a pas pu être importé sur Reactive Resume.
+            </p>
+            <button
+              onClick={() => navigate("/generation")}
+              className="bg-primary text-primary-foreground rounded-lg px-6 py-3 font-semibold"
+            >
+              Réessayer la génération
+            </button>
           </div>
-        </div>
-
-        {/* Validation Section */}
-        <CVValidationSection
-          skills={skills}
-          validations={[]}
-          onRequestSent={() => {}}
-        />
+        ) : (
+          <div className="flex justify-center">
+            <div className="w-full max-w-4xl bg-card rounded-xl border border-border shadow-2xl overflow-hidden">
+              <div className="bg-muted/50 px-4 py-2 flex items-center justify-between border-b border-border">
+                <span className="text-xs text-muted-foreground font-medium">
+                  Aperçu — Template: <span className="text-foreground font-semibold capitalize">{template}</span>
+                </span>
+                {publicUrl && (
+                  <a
+                    href={publicUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline flex items-center gap-1"
+                  >
+                    Ouvrir dans Reactive Resume <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+              <iframe
+                key={iframeKey}
+                src={publicUrl || "about:blank"}
+                className="w-full border-0"
+                style={{ height: "1200px" }}
+                title="CV Preview"
+                sandbox="allow-scripts allow-same-origin"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Cover Letter Modal */}

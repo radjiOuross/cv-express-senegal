@@ -10,6 +10,7 @@ const STATUS_MESSAGES = [
   "Analyse de ton parcours...",
   "Optimisation des descriptions...",
   "Amélioration des compétences...",
+  "Création du CV sur Reactive Resume...",
   "Finalisation du CV...",
 ];
 
@@ -34,21 +35,44 @@ const LoadingPage = () => {
       }
 
       try {
-        const { data, error } = await supabase.functions.invoke("generate-cv", {
+        // Step 1: Generate AI-enhanced data
+        const { data: genData, error: genError } = await supabase.functions.invoke("generate-cv", {
           body: { formData },
         });
 
-        if (error) throw error;
+        if (genError) throw genError;
 
-        // Store AI data in localStorage for preview
-        localStorage.setItem("cvexpress_ai_data", JSON.stringify(data.aiData));
-        
-        // Save to Supabase
+        const aiData = genData?.aiData || null;
+        localStorage.setItem("cvexpress_ai_data", JSON.stringify(aiData));
+
+        // Step 2: Import to Reactive Resume
+        const { data: rrData, error: rrError } = await supabase.functions.invoke("reactive-resume-export", {
+          body: {
+            action: "import",
+            formData,
+            aiData,
+            template: "azurill",
+            customization: null,
+          },
+        });
+
+        if (rrError) {
+          console.error("Reactive Resume import error:", rrError);
+          // Still continue - we'll handle this in preview
+        }
+
+        if (rrData?.resumeId) {
+          localStorage.setItem("cvexpress_rr_resume_id", rrData.resumeId);
+          localStorage.setItem("cvexpress_rr_slug", rrData.slug || "");
+          localStorage.setItem("cvexpress_rr_public_url", rrData.publicUrl || "");
+        }
+
+        // Save to database
         await supabase.from("cvs").insert({
           email: formData.personal?.email || "",
           form_data: formData as unknown as import("@/integrations/supabase/types").Json,
-          ai_data: data.aiData as import("@/integrations/supabase/types").Json,
-          template: "classique",
+          ai_data: aiData as import("@/integrations/supabase/types").Json,
+          template: "azurill",
           paid: false,
           ...(user ? { user_id: user.id } : {}),
         });
@@ -56,14 +80,13 @@ const LoadingPage = () => {
         navigate("/apercu");
       } catch (err) {
         console.error("Generation error:", err);
-        // Still navigate with raw data as fallback
         localStorage.setItem("cvexpress_ai_data", JSON.stringify(null));
         navigate("/apercu");
       }
     };
 
     generate();
-  }, [navigate]);
+  }, [navigate, user]);
 
   return (
     <motion.div
@@ -94,7 +117,7 @@ const LoadingPage = () => {
           className="h-full bg-primary rounded-full"
           initial={{ width: "0%" }}
           animate={{ width: "100%" }}
-          transition={{ duration: 12, ease: "linear" }}
+          transition={{ duration: 15, ease: "linear" }}
         />
       </div>
     </motion.div>
