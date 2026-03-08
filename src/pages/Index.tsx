@@ -31,9 +31,20 @@ const Index = () => {
           <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             Analyser une offre
           </button>
-          <button onClick={() => navigate("/creer")} className="btn-primary-sm">
-            Commencer
-          </button>
+          {user ? (
+            <button onClick={() => navigate("/dashboard")} className="btn-primary-sm flex items-center gap-2">
+              <LayoutDashboard className="w-4 h-4" /> Mon espace
+            </button>
+          ) : (
+            <>
+              <button onClick={() => navigate("/connexion")} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                <User className="w-4 h-4" /> Connexion
+              </button>
+              <button onClick={() => navigate("/creer")} className="btn-primary-sm">
+                Commencer
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
