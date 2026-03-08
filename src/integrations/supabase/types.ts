@@ -22,8 +22,14 @@ export type Database = {
           form_data: Json
           id: string
           paid: boolean
+          profile_public: boolean
+          profile_slug: string | null
+          show_email: boolean
+          show_phone: boolean
           template: string
           user_id: string | null
+          video_script: string | null
+          video_url: string | null
         }
         Insert: {
           ai_data?: Json | null
@@ -32,8 +38,14 @@ export type Database = {
           form_data?: Json
           id?: string
           paid?: boolean
+          profile_public?: boolean
+          profile_slug?: string | null
+          show_email?: boolean
+          show_phone?: boolean
           template?: string
           user_id?: string | null
+          video_script?: string | null
+          video_url?: string | null
         }
         Update: {
           ai_data?: Json | null
@@ -42,10 +54,45 @@ export type Database = {
           form_data?: Json
           id?: string
           paid?: boolean
+          profile_public?: boolean
+          profile_slug?: string | null
+          show_email?: boolean
+          show_phone?: boolean
           template?: string
           user_id?: string | null
+          video_script?: string | null
+          video_url?: string | null
         }
         Relationships: []
+      }
+      profile_views: {
+        Row: {
+          cv_id: string
+          id: string
+          referrer: string | null
+          viewed_at: string
+        }
+        Insert: {
+          cv_id: string
+          id?: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          cv_id?: string
+          id?: string
+          referrer?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_views_cv_id_fkey"
+            columns: ["cv_id"]
+            isOneToOne: false
+            referencedRelation: "cvs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       validation_requests: {
         Row: {
