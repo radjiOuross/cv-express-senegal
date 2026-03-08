@@ -44,8 +44,8 @@ const LoadingPage = () => {
         // Save to Supabase
         await supabase.from("cvs").insert({
           email: formData.personal?.email || "",
-          form_data: formData as any,
-          ai_data: data.aiData,
+          form_data: formData as unknown as import("@/integrations/supabase/types").Json,
+          ai_data: data.aiData as import("@/integrations/supabase/types").Json,
           template: "classique",
           paid: false,
         });
