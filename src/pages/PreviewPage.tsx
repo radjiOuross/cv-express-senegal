@@ -39,19 +39,52 @@ const PreviewPage = () => {
     return null;
   }
 
+  const [downloading, setDownloading] = useState(false);
+
   const handleDownload = async () => {
-    if (!cvRef.current) return;
-    const html2pdf = (await import("html2pdf.js")).default;
-    html2pdf()
-      .set({
-        margin: 0,
-        filename: `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      })
-      .from(cvRef.current)
-      .save();
+    if (downloading) return;
+    setDownloading(true);
+    
+    try {
+      toast.info("Génération du PDF en cours...");
+      
+      const { data, error } = await supabase.functions.invoke("reactive-resume-export", {
+        body: { formData, aiData, template, customization },
+      });
+
+      if (error) throw error;
+      if (!data?.pdfUrl) throw new Error("Aucun lien PDF reçu");
+
+      // Download the PDF
+      const link = document.createElement("a");
+      link.href = data.pdfUrl;
+      link.download = `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("CV téléchargé avec succès !");
+    } catch (err) {
+      console.error("Download error:", err);
+      toast.error("Erreur lors du téléchargement. Tentative avec le rendu local...");
+      
+      // Fallback to html2pdf
+      if (!cvRef.current) return;
+      const html2pdf = (await import("html2pdf.js")).default;
+      html2pdf()
+        .set({
+          margin: 0,
+          filename: `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        })
+        .from(cvRef.current)
+        .save();
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const templates: { key: TemplateName; label: string; colors: string[]; layout: string }[] = [
