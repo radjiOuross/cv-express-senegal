@@ -76,6 +76,38 @@ const DashboardPage = () => {
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
   const userAvatar = user?.user_metadata?.avatar_url;
 
+  // Profile stats
+  const [viewCount, setViewCount] = useState(0);
+  const [profileSlug, setProfileSlug] = useState("");
+  const [hasVideo, setHasVideo] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  useEffect(() => {
+    if (user && cvs.length > 0) {
+      const latestCv = cvs[0];
+      const slug = (latestCv as any).profile_slug;
+      setProfileSlug(slug || "");
+      setHasVideo(!!(latestCv as any).video_url);
+
+      // Get weekly views
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      supabase
+        .from("profile_views")
+        .select("*", { count: "exact", head: true })
+        .eq("cv_id", latestCv.id)
+        .gte("viewed_at", weekAgo.toISOString())
+        .then(({ count }) => setViewCount(count || 0));
+    }
+  }, [user, cvs]);
+
+  const copyProfileLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/profil/${profileSlug}`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
       <nav className="flex items-center justify-between px-6 md:px-12 py-5 border-b border-border">
@@ -85,6 +117,9 @@ const DashboardPage = () => {
             {userAvatar && <img src={userAvatar} alt="" className="w-8 h-8 rounded-full" />}
             <span className="text-sm text-foreground font-medium hidden sm:block">{userName}</span>
           </div>
+          <button onClick={() => setShowSettings(!showSettings)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+            <Settings className="w-4 h-4" /> Paramètres
+          </button>
           <button onClick={handleSignOut} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
             <LogOut className="w-4 h-4" /> Déconnexion
           </button>
@@ -92,6 +127,78 @@ const DashboardPage = () => {
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-10">
+        {/* Dashboard cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Profile card */}
+          <div className="glass-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground">Mon profil en ligne</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">👁️ {viewCount} vues cette semaine</p>
+            {profileSlug ? (
+              <div className="flex gap-2">
+                <button onClick={() => navigate(`/profil/${profileSlug}`)} className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground">
+                  <Eye className="w-3 h-3 inline mr-1" /> Voir
+                </button>
+                <button onClick={copyProfileLink} className="text-xs px-3 py-1.5 rounded-lg bg-secondary text-secondary-foreground">
+                  {linkCopied ? <Check className="w-3 h-3 inline mr-1" /> : <Copy className="w-3 h-3 inline mr-1" />}
+                  {linkCopied ? "Copié" : "Copier"}
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Crée ton premier CV pour activer ton profil</p>
+            )}
+          </div>
+
+          {/* Video card */}
+          <div className="glass-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Video className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground">Ma vidéo CV</h3>
+            </div>
+            {hasVideo ? (
+              <p className="text-sm text-primary">✅ Vidéo publiée</p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-3">Crée ta vidéo de présentation</p>
+                <button onClick={() => navigate("/video-cv/script")} className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-foreground">
+                  🎥 Créer ma vidéo
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Completeness card */}
+          <div className="glass-card">
+            <h3 className="font-semibold text-foreground mb-3">Profil complet</h3>
+            {(() => {
+              const pct = (cvs.length > 0 ? 50 : 0) + (hasVideo ? 25 : 0) + (profileSlug ? 25 : 0);
+              return (
+                <>
+                  <div className="w-full h-2 rounded-full bg-muted mb-2">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {pct}% — {!hasVideo ? "Ajoute une vidéo pour progresser" : "Excellent !"}
+                  </p>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* Settings panel */}
+        {showSettings && (
+          <div className="mb-8">
+            <ProfileSettings />
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-display font-bold text-foreground">Mes CV</h1>
