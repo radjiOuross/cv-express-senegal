@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FileText, Sparkles, Layout, Download, Check, User, LayoutDashboard,
   Mic, Globe, Search, Shield, Mail, Palette, ArrowRight, Star,
-  SlidersHorizontal, Type, Camera, Zap, Lock, Upload, RefreshCw, Target, TrendingUp, Video
+  SlidersHorizontal, Lock, Upload, Video, Zap, ChevronRight
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import cvMockup1 from "@/assets/cv-mockup-1.png";
@@ -11,102 +11,82 @@ import cvMockup2 from "@/assets/cv-mockup-2.png";
 import cvMockup3 from "@/assets/cv-mockup-3.png";
 
 const steps = [
-  { icon: FileText, label: "Remplis", desc: "Tes infos ou dicte-les par voix" },
-  { icon: Sparkles, label: "IA optimise", desc: "Contenu amélioré automatiquement" },
-  { icon: Layout, label: "Choisis", desc: "Parmi 7 templates pros" },
-  { icon: Download, label: "Télécharge", desc: "Ton CV en PDF prêt à l'emploi" },
+  { icon: FileText, label: "Remplis tes infos", desc: "Saisis ou dicte tes informations professionnelles" },
+  { icon: Sparkles, label: "L'IA optimise", desc: "Ton contenu est reformulé et enrichi automatiquement" },
+  { icon: Layout, label: "Choisis ton design", desc: "Sélectionne parmi des templates professionnels" },
+  { icon: Download, label: "Télécharge ton CV", desc: "Export PDF haute qualité, prêt à envoyer" },
 ];
 
 const features = [
   {
     icon: Mic,
-    title: "Remplissage vocal",
-    desc: "Dicte tes informations, l'IA remplit le formulaire automatiquement. Compatible tous navigateurs : Chrome, Safari, Firefox, Arc.",
-    color: "bg-primary/10 text-primary",
-    badge: "Universel",
+    title: "Saisie vocale intelligente",
+    desc: "Dicte tes informations naturellement. L'IA structure et remplit le formulaire automatiquement.",
+    gradient: "from-primary/20 to-primary/5",
   },
   {
     icon: Palette,
     title: "Personnalisation avancée",
-    desc: "10 palettes de couleurs, 8 typographies, réorganisation des sections, densité ajustable, styles de photo et de compétences.",
-    color: "bg-pink-500/10 text-pink-400",
-    badge: "Nouveau",
+    desc: "Couleurs, typographies, disposition des sections, densité et styles de compétences ajustables.",
+    gradient: "from-accent/20 to-accent/5",
   },
   {
     icon: Globe,
     title: "Traduction instantanée",
-    desc: "Traduis ton CV en anglais, arabe ou wolof en un clic. L'IA adapte le contenu culturellement.",
-    color: "bg-accent/10 text-accent",
-    badge: null,
+    desc: "Traduis ton CV en anglais, arabe ou wolof. L'IA adapte le contenu culturellement.",
+    gradient: "from-primary/20 to-primary/5",
   },
   {
     icon: Search,
     title: "Analyse d'offres d'emploi",
-    desc: "Colle une offre et obtiens un score de compatibilité avec ton CV + des conseils pour l'améliorer.",
-    color: "bg-blue-500/10 text-blue-400",
-    badge: null,
+    desc: "Score de compatibilité et recommandations personnalisées pour chaque offre.",
+    gradient: "from-accent/20 to-accent/5",
   },
   {
     icon: Mail,
     title: "Lettre de motivation IA",
-    desc: "Génère une lettre de motivation personnalisée et professionnelle à partir de ton CV en secondes.",
-    color: "bg-purple-500/10 text-purple-400",
-    badge: null,
-  },
-  {
-    icon: Shield,
-    title: "Certification compétences",
-    desc: "Fais valider tes compétences par des professionnels. Un badge de confiance sur ton CV.",
-    color: "bg-orange-500/10 text-orange-400",
-    badge: null,
+    desc: "Génération automatique d'une lettre professionnelle adaptée à ton profil.",
+    gradient: "from-primary/20 to-primary/5",
   },
   {
     icon: Video,
-    title: "CV Vidéo IA",
-    desc: "Génère un script pro avec l'IA, enregistre-toi avec téléprompteur et publie ta vidéo sur ton profil.",
-    color: "bg-red-500/10 text-red-400",
-    badge: "Nouveau",
+    title: "CV Vidéo avec téléprompteur",
+    desc: "Script généré par l'IA, enregistrement guidé et publication sur ton profil.",
+    gradient: "from-accent/20 to-accent/5",
+  },
+  {
+    icon: Shield,
+    title: "Certification de compétences",
+    desc: "Fais valider tes compétences par des professionnels reconnus.",
+    gradient: "from-primary/20 to-primary/5",
   },
   {
     icon: LayoutDashboard,
-    title: "Dashboard personnel",
-    desc: "Connecte-toi avec Google ou Apple. Retrouve, modifie et gère tous tes CV depuis ton espace.",
-    color: "bg-emerald-500/10 text-emerald-400",
-    badge: "Nouveau",
-  },
-  {
-    icon: SlidersHorizontal,
-    title: "7 templates + customisation",
-    desc: "Classique, Moderne, Minimaliste, Élégant, Audacieux, Nature et Corporate. Chaque template est personnalisable.",
-    color: "bg-cyan-500/10 text-cyan-400",
-    badge: null,
+    title: "Espace personnel sécurisé",
+    desc: "Connexion Google ou Apple. Gère, modifie et retrouve tous tes CV.",
+    gradient: "from-accent/20 to-accent/5",
   },
 ];
 
-const highlightFeatures = [
-  {
-    icon: Palette,
-    title: "Personnalise chaque détail",
-    items: ["10 palettes de couleurs prédéfinies", "8 combinaisons de polices Google Fonts", "Réordonne les sections par glisser-déposer", "Ajuste la densité : compact ou aéré", "Photo : cercle, carré, hexagone ou sans", "Compétences : barres, points, pills, %"],
-  },
-  {
-    icon: Sparkles,
-    title: "L'IA fait le travail pour toi",
-    items: ["Optimise tes descriptions d'expérience", "Génère un résumé professionnel percutant", "Traduit en 3 langues instantanément", "Analyse ta compatibilité avec les offres", "Rédige ta lettre de motivation", "Transcrit ta voix en données structurées"],
-  },
-  {
-    icon: Lock,
-    title: "Ton espace sécurisé",
-    items: ["Connexion rapide Google / Apple", "Retrouve tous tes CV en un clic", "Modifie et mets à jour à tout moment", "Données sauvegardées dans le cloud", "Exporte en PDF haute qualité", "Aucun mot de passe à retenir"],
-  },
+const stats = [
+  { value: "2 min", label: "Temps moyen de création" },
+  { value: "4", label: "Templates professionnels" },
+  { value: "3", label: "Langues disponibles" },
+  { value: "100%", label: "Gratuit pour commencer" },
 ];
 
 const testimonials = [
-  { name: "Amadou D.", role: "Développeur Web, Dakar", text: "J'ai créé mon CV en 3 minutes. L'optimisation IA a complètement transformé mes descriptions. Le panneau de personnalisation est incroyable." },
-  { name: "Fatou S.", role: "Comptable, Thiès", text: "La traduction en anglais m'a permis de postuler à des offres internationales. J'adore pouvoir changer les couleurs et la police." },
-  { name: "Moussa N.", role: "Chef de projet, Dakar", text: "L'analyse d'offre d'emploi m'aide à adapter mon CV à chaque candidature. Le dashboard est super pratique." },
-  { name: "Aïssatou B.", role: "Designer UX, Saint-Louis", text: "Le remplissage vocal fonctionne parfaitement sur mon iPhone. Plus besoin de taper, je dicte et c'est rempli !" },
+  { name: "Amadou D.", role: "Développeur Web — Dakar", text: "L'optimisation IA a transformé mes descriptions d'expérience. Le résultat est bien plus professionnel que ce que j'aurais pu rédiger seul." },
+  { name: "Fatou S.", role: "Comptable — Thiès", text: "La traduction en anglais m'a permis de postuler à des offres internationales. Le processus est fluide et rapide." },
+  { name: "Moussa N.", role: "Chef de projet — Dakar", text: "L'analyse d'offre d'emploi m'aide à adapter mon CV à chaque candidature. Un outil indispensable." },
+  { name: "Aïssatou B.", role: "Designer UX — Saint-Louis", text: "Le remplissage vocal fonctionne parfaitement. Plus besoin de taper, je dicte et tout se remplit." },
 ];
+
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+};
 
 const Index = () => {
   const navigate = useNavigate();
@@ -120,13 +100,15 @@ const Index = () => {
       className="min-h-screen bg-background"
     >
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <span className="text-2xl font-bold text-primary tracking-tight">CVExpress</span>
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/importer")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:flex items-center gap-1">
-            <Upload className="w-4 h-4" /> Importer un CV
+      <nav className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
+        <span className="text-2xl font-display font-bold text-foreground tracking-tight">
+          CV<span className="text-primary">Express</span>
+        </span>
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate("/importer")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden md:flex items-center gap-1.5">
+            <Upload className="w-4 h-4" /> Importer
           </button>
-          <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+          <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden md:block">
             Analyser une offre
           </button>
           {user ? (
@@ -135,7 +117,7 @@ const Index = () => {
             </button>
           ) : (
             <>
-              <button onClick={() => navigate("/connexion")} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+              <button onClick={() => navigate("/connexion")} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
                 <User className="w-4 h-4" /> Connexion
               </button>
               <button onClick={() => navigate("/creer")} className="btn-primary-sm">
@@ -147,198 +129,118 @@ const Index = () => {
       </nav>
 
       {/* Hero */}
-      <section className="px-6 md:px-12 pt-16 pb-24 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="relative px-6 md:px-12 pt-20 pb-28 max-w-7xl mx-auto overflow-hidden">
+        {/* Subtle glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/8 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-medium px-4 py-2 rounded-full mb-6">
-              <Sparkles className="w-4 h-4" /> Propulsé par l'Intelligence Artificielle
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-8">
+              <Sparkles className="w-3.5 h-3.5" /> Propulsé par l'Intelligence Artificielle
             </div>
-            <h1 className="font-display text-4xl md:text-[56px] leading-tight font-bold text-foreground mb-6">
-              Crée ton CV professionnel en <span className="text-primary">2 minutes</span>
+            <h1 className="font-display text-4xl md:text-[56px] leading-[1.1] font-bold text-foreground mb-6">
+              Ton CV professionnel,{" "}
+              <span className="text-primary">créé en 2 minutes</span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-4 max-w-lg">
-              Dicte, écris ou remplis — l'IA transforme tes informations en CV parfait.
+            <p className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed">
+              Saisis tes informations ou dicte-les par voix. L'IA optimise, met en forme
+              et génère un CV prêt à impressionner les recruteurs.
             </p>
-            <div className="flex flex-wrap gap-2 mb-8">
-              {["7 templates", "Personnalisation totale", "Traduction IA", "Lettre de motivation", "Dashboard"].map(tag => (
-                <span key={tag} className="tag-chip text-xs">{tag}</span>
-              ))}
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <button onClick={() => navigate("/creer")} className="btn-primary text-lg flex items-center justify-center gap-2 group">
+                Créer mon CV <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button onClick={() => navigate("/video-cv/script")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card hover:border-primary/30 transition-all flex items-center justify-center gap-2">
+                <Video className="w-5 h-5 text-primary" /> CV Vidéo
+              </button>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={() => navigate("/creer")} className="btn-primary text-lg flex items-center justify-center gap-2">
-                Créer mon CV <ArrowRight className="w-5 h-5" />
-              </button>
-              <button onClick={() => navigate("/importer")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
-                <Upload className="w-5 h-5" /> Importer un CV existant
-              </button>
-              <button onClick={() => navigate("/video-cv/script")} className="px-8 py-4 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold hover:bg-primary/10 transition-all flex items-center justify-center gap-2">
-                <Video className="w-5 h-5" /> 🎥 CV Vidéo
-              </button>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Gratuit</span>
+              <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Sans inscription</span>
+              <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> PDF en 2 min</span>
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
             className="flex justify-center items-end gap-4"
           >
-            <motion.img src={cvMockup1} alt="CV Classique" className="w-40 md:w-48 rounded-lg shadow-2xl"
-              animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
-            <motion.img src={cvMockup2} alt="CV Moderne" className="w-44 md:w-52 rounded-lg shadow-2xl -mt-6"
-              animate={{ y: [0, -12, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} />
-            <motion.img src={cvMockup3} alt="CV Minimaliste" className="w-40 md:w-48 rounded-lg shadow-2xl"
-              animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }} />
+            <motion.img src={cvMockup1} alt="CV template classique" className="w-36 md:w-44 rounded-lg shadow-2xl shadow-black/40"
+              animate={{ y: [0, -8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+            <motion.img src={cvMockup2} alt="CV template moderne" className="w-40 md:w-52 rounded-lg shadow-2xl shadow-black/40 -mt-4"
+              animate={{ y: [0, -12, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.6 }} />
+            <motion.img src={cvMockup3} alt="CV template minimaliste" className="w-36 md:w-44 rounded-lg shadow-2xl shadow-black/40"
+              animate={{ y: [0, -8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.2 }} />
           </motion.div>
         </div>
       </section>
 
+      {/* Stats bar */}
+      <section className="border-y border-border/50 bg-card/30">
+        <div className="max-w-6xl mx-auto px-6 md:px-12 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {stats.map((s, i) => (
+            <motion.div key={s.label} {...fadeUp} transition={{ delay: i * 0.1 }} className="text-center">
+              <div className="text-3xl md:text-4xl font-display font-bold text-primary mb-1">{s.value}</div>
+              <div className="text-sm text-muted-foreground">{s.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* How it works */}
-      <section className="px-6 md:px-12 py-20 bg-card/50">
+      <section className="px-6 md:px-12 py-24">
         <div className="max-w-5xl mx-auto">
-          <h2 className="section-title text-center mb-4">Comment ça marche ?</h2>
-          <p className="text-muted-foreground text-center mb-16 max-w-xl mx-auto">4 étapes simples pour un CV professionnel optimisé par l'IA</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <h2 className="section-title mb-4">Comment ça marche</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Quatre étapes simples pour obtenir un CV professionnel optimisé par l'IA
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
             {steps.map((step, i) => (
-              <motion.div key={step.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.15 }} className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
+              <motion.div key={step.label} {...fadeUp} transition={{ delay: i * 0.12 }} className="text-center relative">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mx-auto mb-5 border border-primary/10">
                   <step.icon className="w-7 h-7 text-primary" />
-                  {i < steps.length - 1 && <div className="hidden md:block absolute -right-12 top-1/2 w-8 h-0.5 bg-border" />}
                 </div>
-                <div className="text-sm font-semibold text-primary mb-1">Étape {i + 1}</div>
-                <div className="font-semibold text-foreground text-lg">{step.label}</div>
-                <div className="text-sm text-muted-foreground mt-1">{step.desc}</div>
+                {i < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-[calc(50%+40px)] w-[calc(100%-80px)] h-px bg-gradient-to-r from-border to-transparent" />
+                )}
+                <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Étape {i + 1}</div>
+                <div className="font-semibold text-foreground mb-1">{step.label}</div>
+                <div className="text-xs text-muted-foreground leading-relaxed">{step.desc}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-      {/* Import CV Section */}
-      <section className="px-6 md:px-12 py-20">
+
+      {/* Features grid */}
+      <section className="px-6 md:px-12 py-24 bg-card/30">
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <div className="inline-flex items-center gap-2 bg-accent/10 text-accent text-sm font-medium px-4 py-2 rounded-full mb-6">
-                <Upload className="w-4 h-4" /> Nouvelle fonctionnalité
-              </div>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
-                Tu as déjà un CV ?<br />
-                <span className="text-primary">Améliore-le avec l'IA</span>
-              </h2>
-              <p className="text-muted-foreground text-lg mb-8 max-w-lg">
-                Importe ton CV existant (PDF, DOCX ou image) et notre IA l'analyse en profondeur. 
-                Elle extrait tes données, évalue la qualité et te donne des recommandations concrètes 
-                pour le rendre irrésistible aux recruteurs.
-              </p>
-
-              <div className="space-y-4 mb-8">
-                {[
-                  { icon: Upload, title: "Upload ton ancien CV", desc: "PDF, Word ou même une photo — l'IA lit tout" },
-                  { icon: Target, title: "Score de qualité instantané", desc: "Découvre les points forts et les faiblesses de ton CV" },
-                  { icon: TrendingUp, title: "Recommandations personnalisées", desc: "Reçois des conseils précis : sections manquantes, formulations à améliorer" },
-                  { icon: RefreshCw, title: "Régénère en un clic", desc: "Applique les améliorations et génère un nouveau CV optimisé" },
-                ].map((item, i) => (
-                  <motion.div key={item.title} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                    className="flex items-start gap-4"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              <button onClick={() => navigate("/importer")} className="btn-primary text-lg flex items-center gap-2">
-                <Upload className="w-5 h-5" /> Importer mon CV <ArrowRight className="w-5 h-5" />
-              </button>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">Analyse IA</h4>
-                    <p className="text-xs text-muted-foreground">Score de ton CV</p>
-                  </div>
-                  <div className="ml-auto">
-                    <span className="text-3xl font-bold text-primary">72%</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  {[
-                    { type: "✅", label: "Expériences bien détaillées", color: "border-l-primary" },
-                    { type: "⚠️", label: "Ajoute un résumé professionnel", color: "border-l-orange-400" },
-                    { type: "⚠️", label: "Manque de verbes d'action", color: "border-l-orange-400" },
-                    { type: "💡", label: "Ajoute tes certifications", color: "border-l-blue-400" },
-                    { type: "❌", label: "Section langues absente", color: "border-l-destructive" },
-                  ].map((item, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, x: 10 }} whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }} transition={{ delay: 0.3 + i * 0.1 }}
-                      className={`bg-muted/50 rounded-lg p-3 border-l-4 ${item.color} flex items-center gap-2`}
-                    >
-                      <span>{item.type}</span>
-                      <span className="text-sm text-foreground">{item.label}</span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <div className="flex-1 bg-primary/10 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-primary">3</p>
-                    <p className="text-xs text-muted-foreground">Améliorations</p>
-                  </div>
-                  <div className="flex-1 bg-orange-500/10 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-orange-500">2</p>
-                    <p className="text-xs text-muted-foreground">Manquants</p>
-                  </div>
-                  <div className="flex-1 bg-blue-500/10 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold text-blue-500">1</p>
-                    <p className="text-xs text-muted-foreground">Conseil</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-
-      <section className="px-6 md:px-12 py-20">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="section-title text-center mb-4">Toutes les fonctionnalités</h2>
-          <p className="text-muted-foreground text-center mb-16 max-w-xl mx-auto">
-            Des outils puissants pour créer le CV parfait et décrocher ton emploi
-          </p>
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <h2 className="section-title mb-4">Fonctionnalités complètes</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Tous les outils pour créer, optimiser et partager un CV qui fait la différence
+            </p>
+          </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((f, i) => (
-              <motion.div key={f.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.07 }}
-                className="glass-card hover:border-primary/20 transition-all group relative">
-                {f.badge && (
-                  <span className="absolute top-3 right-3 text-[9px] font-bold uppercase bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                    {f.badge}
-                  </span>
-                )}
-                <div className={`w-11 h-11 rounded-xl ${f.color} flex items-center justify-center mb-3`}>
-                  <f.icon className="w-5 h-5" />
+              <motion.div
+                key={f.title}
+                {...fadeUp}
+                transition={{ delay: i * 0.06 }}
+                className="group bg-card border border-border/60 rounded-2xl p-6 hover:border-primary/25 transition-all duration-300"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-4 border border-border/40`}>
+                  <f.icon className="w-5 h-5 text-foreground" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground mb-1.5">{f.title}</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-2">{f.title}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
@@ -346,52 +248,148 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Highlight Features — detailed 3-column */}
-      <section className="px-6 md:px-12 py-20 bg-card/50">
+      {/* Import CV Section */}
+      <section className="px-6 md:px-12 py-24">
         <div className="max-w-6xl mx-auto">
-          <h2 className="section-title text-center mb-4">Ce qui nous rend unique</h2>
-          <p className="text-muted-foreground text-center mb-16 max-w-xl mx-auto">
-            Bien plus qu'un simple générateur de CV
-          </p>
-          <div className="grid md:grid-cols-3 gap-8">
-            {highlightFeatures.map((hf, i) => (
-              <motion.div key={hf.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.15 }}
-                className="glass-card">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <hf.icon className="w-6 h-6 text-primary" />
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div {...fadeUp}>
+              <div className="inline-flex items-center gap-2 bg-accent/10 text-accent text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-6">
+                <Upload className="w-3.5 h-3.5" /> Import intelligent
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6 leading-tight">
+                Tu as déjà un CV ?<br />
+                <span className="text-primary">Améliore-le avec l'IA</span>
+              </h2>
+              <p className="text-muted-foreground text-base mb-8 max-w-lg leading-relaxed">
+                Importe ton CV existant en PDF, Word ou image. L'IA l'analyse en profondeur,
+                évalue sa qualité et te donne des recommandations concrètes pour le rendre
+                irrésistible aux recruteurs.
+              </p>
+              <div className="space-y-4 mb-8">
+                {[
+                  { icon: Upload, title: "Upload multi-format", desc: "PDF, Word ou photo — l'IA lit tout" },
+                  { icon: Sparkles, title: "Score de qualité instantané", desc: "Points forts et axes d'amélioration identifiés" },
+                  { icon: ArrowRight, title: "Régénération en un clic", desc: "Applique les améliorations et génère un CV optimisé" },
+                ].map((item, i) => (
+                  <motion.div key={item.title} {...fadeUp} transition={{ delay: 0.1 + i * 0.08 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/10">
+                      <item.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground text-sm">{item.title}</h4>
+                      <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              <button onClick={() => navigate("/importer")} className="btn-primary flex items-center gap-2 group">
+                Importer mon CV <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </motion.div>
+
+            <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="relative">
+              <div className="bg-card rounded-2xl border border-border/60 p-8 shadow-xl shadow-black/20">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground text-sm">Analyse IA</h4>
+                    <p className="text-xs text-muted-foreground">Score de qualité</p>
+                  </div>
+                  <div className="ml-auto">
+                    <span className="text-3xl font-display font-bold text-primary">72<span className="text-lg">%</span></span>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-4">{hf.title}</h3>
-                <ul className="space-y-2.5">
-                  {hf.items.map(item => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-secondary-foreground">
-                      <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
+
+                <div className="space-y-2.5 mb-6">
+                  {[
+                    { status: "success", label: "Expériences bien détaillées", border: "border-l-primary" },
+                    { status: "warning", label: "Ajoute un résumé professionnel", border: "border-l-accent" },
+                    { status: "warning", label: "Manque de verbes d'action", border: "border-l-accent" },
+                    { status: "error", label: "Section langues absente", border: "border-l-destructive" },
+                  ].map((item, i) => (
+                    <motion.div key={i} {...fadeUp} transition={{ delay: 0.4 + i * 0.08 }}
+                      className={`bg-muted/40 rounded-lg p-3 border-l-[3px] ${item.border}`}
+                    >
+                      <span className="text-xs text-foreground">{item.label}</span>
+                    </motion.div>
                   ))}
-                </ul>
-              </motion.div>
-            ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="flex-1 bg-primary/8 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold text-primary">3</p>
+                    <p className="text-[10px] text-muted-foreground">Améliorations</p>
+                  </div>
+                  <div className="flex-1 bg-accent/8 rounded-lg p-3 text-center">
+                    <p className="text-xl font-bold text-accent">2</p>
+                    <p className="text-[10px] text-muted-foreground">Manquants</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
+      {/* Video CV Section */}
+      <section className="px-6 md:px-12 py-24 bg-card/30">
+        <div className="max-w-5xl mx-auto text-center">
+          <motion.div {...fadeUp}>
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full mb-6">
+              <Video className="w-3.5 h-3.5" /> CV Vidéo
+            </div>
+            <h2 className="section-title mb-4">Démarque-toi avec un CV Vidéo</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
+              L'IA rédige ton script professionnel, le téléprompteur te guide pendant l'enregistrement,
+              et ta vidéo est publiée directement sur ton profil en ligne.
+            </p>
+            <div className="grid sm:grid-cols-3 gap-6 mb-10">
+              {[
+                { icon: Sparkles, title: "Script généré par l'IA", desc: "Un texte professionnel basé sur ton CV" },
+                { icon: Video, title: "Téléprompteur intégré", desc: "Vitesse et taille de police ajustables" },
+                { icon: Globe, title: "Publication instantanée", desc: "Partagé sur ton profil public" },
+              ].map((item, i) => (
+                <motion.div key={item.title} {...fadeUp} transition={{ delay: i * 0.1 }}
+                  className="bg-card border border-border/60 rounded-2xl p-6"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <item.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h4 className="font-semibold text-foreground text-sm mb-1">{item.title}</h4>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+            <button onClick={() => navigate("/video-cv/script")} className="btn-primary text-lg flex items-center gap-2 mx-auto group">
+              Créer mon CV Vidéo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-      <section className="px-6 md:px-12 py-20">
+      <section className="px-6 md:px-12 py-24">
         <div className="max-w-6xl mx-auto">
-          <h2 className="section-title text-center mb-4">Ils nous font confiance</h2>
-          <p className="text-muted-foreground text-center mb-16">Des centaines de CV créés chaque semaine au Sénégal</p>
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <h2 className="section-title mb-4">Ils nous font confiance</h2>
+            <p className="text-muted-foreground">Des centaines de CV créés chaque semaine au Sénégal</p>
+          </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {testimonials.map((t, i) => (
-              <motion.div key={t.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="glass-card">
-                <div className="flex gap-0.5 mb-3">
+              <motion.div key={t.name} {...fadeUp} transition={{ delay: i * 0.08 }}
+                className="bg-card border border-border/60 rounded-2xl p-6"
+              >
+                <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
                     <Star key={j} className="w-3.5 h-3.5 fill-accent text-accent" />
                   ))}
                 </div>
-                <p className="text-secondary-foreground text-xs mb-4 leading-relaxed">"{t.text}"</p>
-                <div>
+                <p className="text-secondary-foreground text-xs mb-5 leading-relaxed">"{t.text}"</p>
+                <div className="border-t border-border/40 pt-4">
                   <p className="font-semibold text-foreground text-xs">{t.name}</p>
                   <p className="text-[10px] text-muted-foreground">{t.role}</p>
                 </div>
@@ -402,33 +400,45 @@ const Index = () => {
       </section>
 
       {/* Pricing */}
-      <section className="px-6 md:px-12 py-20 bg-card/50">
+      <section className="px-6 md:px-12 py-24 bg-card/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="section-title text-center mb-4">Tarifs simples</h2>
-          <p className="text-muted-foreground text-center mb-16">Pas d'abonnement caché. Paye ce que tu utilises.</p>
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <h2 className="section-title mb-4">Tarifs transparents</h2>
+            <p className="text-muted-foreground">Pas d'abonnement caché. Paye uniquement ce que tu utilises.</p>
+          </motion.div>
           <div className="grid md:grid-cols-2 gap-8">
-            <motion.div whileHover={{ scale: 1.02 }} className="glass-card text-center">
-              <div className="text-3xl font-bold text-foreground mb-2">2 000 FCFA</div>
-              <div className="text-muted-foreground mb-6">CV unique</div>
+            <motion.div {...fadeUp} transition={{ delay: 0.1 }}
+              className="bg-card border border-border/60 rounded-2xl p-8 text-center hover:border-border transition-colors"
+            >
+              <div className="text-3xl font-display font-bold text-foreground mb-1">2 000 FCFA</div>
+              <div className="text-sm text-muted-foreground mb-8">CV unique</div>
               <ul className="space-y-3 text-left mb-8">
-                {["1 CV professionnel", "7 templates au choix", "Optimisation IA", "Personnalisation complète", "Remplissage vocal", "Téléchargement PDF"].map(f => (
+                {["1 CV professionnel", "4 templates au choix", "Optimisation IA", "Personnalisation complète", "Saisie vocale", "Export PDF"].map(f => (
                   <li key={f} className="flex items-center gap-3 text-secondary-foreground text-sm">
                     <Check className="w-4 h-4 text-primary flex-shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
-              <button onClick={() => navigate("/creer")} className="btn-primary w-full">Commencer</button>
+              <button onClick={() => navigate("/creer")} className="w-full py-3.5 rounded-xl border border-border text-foreground font-semibold hover:bg-muted transition-all">
+                Commencer
+              </button>
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.02 }} className="glass-card text-center border-primary/30 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">POPULAIRE</div>
-              <div className="text-3xl font-bold text-foreground mb-2">3 000 FCFA<span className="text-lg font-normal text-muted-foreground">/mois</span></div>
-              <div className="text-muted-foreground mb-6">Illimité</div>
+            <motion.div {...fadeUp} transition={{ delay: 0.2 }}
+              className="bg-card border border-primary/30 rounded-2xl p-8 text-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-bl-xl">
+                Populaire
+              </div>
+              <div className="text-3xl font-display font-bold text-foreground mb-1">
+                3 000 FCFA<span className="text-base font-normal text-muted-foreground">/mois</span>
+              </div>
+              <div className="text-sm text-muted-foreground mb-8">Accès illimité</div>
               <ul className="space-y-3 text-left mb-8">
                 {[
                   "CV illimités", "Tous les templates", "Personnalisation avancée", "Optimisation IA avancée",
                   "Traduction multilingue", "Lettre de motivation IA",
-                  "Analyse d'offres d'emploi", "Certification compétences", "Dashboard personnel"
+                  "Analyse d'offres", "CV Vidéo", "Dashboard personnel"
                 ].map(f => (
                   <li key={f} className="flex items-center gap-3 text-secondary-foreground text-sm">
                     <Check className="w-4 h-4 text-primary flex-shrink-0" /> {f}
@@ -442,36 +452,45 @@ const Index = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-6 md:px-12 py-20">
+      <section className="px-6 md:px-12 py-24">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }} className="glass-card border-primary/20 py-12">
-            <Zap className="w-10 h-10 text-primary mx-auto mb-4" />
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              Prêt à décrocher ton emploi ?
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              Rejoins des centaines de professionnels sénégalais qui ont déjà créé leur CV avec CVExpress.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={() => navigate("/creer")} className="btn-primary text-lg flex items-center gap-2 mx-auto sm:mx-0">
-                Créer mon CV maintenant <ArrowRight className="w-5 h-5" />
-              </button>
-              {!user && (
-                <button onClick={() => navigate("/connexion")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2 mx-auto sm:mx-0">
-                  <User className="w-5 h-5" /> Se connecter
+          <motion.div {...fadeUp}
+            className="bg-card border border-primary/15 rounded-2xl py-16 px-8 relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+            <div className="relative z-10">
+              <Zap className="w-10 h-10 text-primary mx-auto mb-5" />
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+                Prêt à décrocher ton emploi ?
+              </h2>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+                Rejoins des centaines de professionnels sénégalais qui créent leur CV avec CVExpress.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onClick={() => navigate("/creer")} className="btn-primary text-lg flex items-center gap-2 mx-auto sm:mx-0 group">
+                  Créer mon CV maintenant <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-              )}
+                {!user && (
+                  <button onClick={() => navigate("/connexion")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2 mx-auto sm:mx-0">
+                    <User className="w-5 h-5" /> Se connecter
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-6 md:px-12 py-8 border-t border-border text-center">
-        <p className="text-muted-foreground text-sm">
-          Made in Dakar, Sénégal 🇸🇳 — © {new Date().getFullYear()} CVExpress
-        </p>
+      <footer className="px-6 md:px-12 py-8 border-t border-border/40">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <span className="text-sm font-display font-semibold text-foreground">
+            CV<span className="text-primary">Express</span>
+          </span>
+          <p className="text-muted-foreground text-xs">
+            Conçu à Dakar, Sénégal — © {new Date().getFullYear()} CVExpress. Tous droits réservés.
+          </p>
+        </div>
       </footer>
     </motion.div>
   );
