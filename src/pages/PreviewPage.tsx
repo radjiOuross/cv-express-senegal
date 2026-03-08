@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { loadFormData } from "@/lib/storage";
 import { FormData, AIData, TemplateName } from "@/types/cv";
+import { CVCustomization, loadCustomization, saveCustomization } from "@/types/customization";
 import CVClassique from "@/components/cv/CVClassique";
 import CVModerne from "@/components/cv/CVModerne";
 import CVMinimaliste from "@/components/cv/CVMinimaliste";
@@ -13,19 +14,26 @@ import CVCorporate from "@/components/cv/CVCorporate";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
 import CVValidationSection from "@/components/CVValidationSection";
-import { Download, FileText, Check, Mail, Search } from "lucide-react";
+import CustomizationPanel from "@/components/CustomizationPanel";
+import { Download, FileText, Check, Mail, Search, Palette } from "lucide-react";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
   const [template, setTemplate] = useState<TemplateName>("classique");
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("fr");
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [customization, setCustomization] = useState<CVCustomization>(loadCustomization);
   const cvRef = useRef<HTMLDivElement>(null);
 
   const formData = loadFormData() as FormData;
   const aiDataRaw = localStorage.getItem("cvexpress_ai_data");
   const originalAiData: AIData | null = aiDataRaw ? JSON.parse(aiDataRaw) : null;
   const [aiData, setAiData] = useState<AIData | null>(originalAiData);
+
+  useEffect(() => {
+    saveCustomization(customization);
+  }, [customization]);
 
   if (!formData?.personal?.prenom) {
     navigate("/creer");
@@ -111,8 +119,31 @@ const PreviewPage = () => {
 
   const skills = aiData?.competences || formData.skills || [];
 
+  const cvProps = { formData, aiData, customization };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen bg-background">
+      {/* Customization Panel */}
+      <CustomizationPanel
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        customization={customization}
+        onChange={setCustomization}
+      />
+
+      {/* Floating button */}
+      {!panelOpen && (
+        <motion.button
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          onClick={() => setPanelOpen(true)}
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-primary text-primary-foreground px-3 py-4 rounded-r-xl shadow-lg hover:brightness-110 transition-all flex flex-col items-center gap-1"
+        >
+          <Palette className="w-5 h-5" />
+          <span className="text-[9px] font-bold writing-vertical" style={{ writingMode: "vertical-lr" }}>Personnaliser</span>
+        </motion.button>
+      )}
+
       <nav className="flex items-center justify-between px-6 md:px-12 py-5">
         <span className="text-2xl font-bold text-primary tracking-tight cursor-pointer" onClick={() => navigate("/")}>CVExpress</span>
         <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
@@ -163,8 +194,11 @@ const PreviewPage = () => {
           <button onClick={handleDownload} className="btn-primary flex items-center justify-center gap-2 px-6 py-3">
             <Download className="w-5 h-5" /> Télécharger PDF — 2000 FCFA
           </button>
+          <button onClick={() => setPanelOpen(true)} className="btn-primary-sm flex items-center gap-2 bg-accent text-accent-foreground">
+            <Palette className="w-4 h-4" /> 🎨 Personnaliser
+          </button>
           <button onClick={() => setCoverLetterOpen(true)} className="btn-primary-sm flex items-center gap-2">
-            <Mail className="w-4 h-4" /> 💌 Générer ma lettre de motivation
+            <Mail className="w-4 h-4" /> 💌 Lettre de motivation
           </button>
           <button onClick={() => navigate("/creer")} className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium flex items-center justify-center gap-2">
             <FileText className="w-4 h-4" /> Modifier les infos
@@ -176,20 +210,20 @@ const PreviewPage = () => {
           <div className="shadow-2xl rounded-lg overflow-hidden" style={{ width: 794 }}>
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${template}-${currentLang}`}
+                key={`${template}-${currentLang}-${JSON.stringify(customization.colors)}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25 }}
                 ref={cvRef}
               >
-                {template === "classique" && <CVClassique formData={formData} aiData={aiData} />}
-                {template === "moderne" && <CVModerne formData={formData} aiData={aiData} />}
-                {template === "minimaliste" && <CVMinimaliste formData={formData} aiData={aiData} />}
-                {template === "elegant" && <CVElegant formData={formData} aiData={aiData} />}
-                {template === "audacieux" && <CVAudacieux formData={formData} aiData={aiData} />}
-                {template === "nature" && <CVNature formData={formData} aiData={aiData} />}
-                {template === "corporate" && <CVCorporate formData={formData} aiData={aiData} />}
+                {template === "classique" && <CVClassique {...cvProps} />}
+                {template === "moderne" && <CVModerne {...cvProps} />}
+                {template === "minimaliste" && <CVMinimaliste {...cvProps} />}
+                {template === "elegant" && <CVElegant {...cvProps} />}
+                {template === "audacieux" && <CVAudacieux {...cvProps} />}
+                {template === "nature" && <CVNature {...cvProps} />}
+                {template === "corporate" && <CVCorporate {...cvProps} />}
               </motion.div>
             </AnimatePresence>
           </div>
