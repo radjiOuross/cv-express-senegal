@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FileText, Sparkles, Layout, Download, Check, User, LayoutDashboard,
   Mic, Globe, Search, Shield, Mail, Palette, ArrowRight, Star,
-  SlidersHorizontal, Type, Camera, Zap, Lock, Upload, RefreshCw, Target, TrendingUp
+  SlidersHorizontal, Type, Camera, Zap, Lock, Upload, RefreshCw, Target, TrendingUp, Video
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import cvMockup1 from "@/assets/cv-mockup-1.png";
@@ -59,6 +59,13 @@ const features = [
     desc: "Fais valider tes compétences par des professionnels. Un badge de confiance sur ton CV.",
     color: "bg-orange-500/10 text-orange-400",
     badge: null,
+  },
+  {
+    icon: Video,
+    title: "CV Vidéo IA",
+    desc: "Génère un script pro avec l'IA, enregistre-toi avec téléprompteur et publie ta vidéo sur ton profil.",
+    color: "bg-red-500/10 text-red-400",
+    badge: "Nouveau",
   },
   {
     icon: LayoutDashboard,
@@ -167,6 +174,9 @@ const Index = () => {
               </button>
               <button onClick={() => navigate("/importer")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
                 <Upload className="w-5 h-5" /> Importer un CV existant
+              </button>
+              <button onClick={() => navigate("/video-cv/script")} className="px-8 py-4 rounded-xl border border-primary/30 bg-primary/5 text-primary font-semibold hover:bg-primary/10 transition-all flex items-center justify-center gap-2">
+                <Video className="w-5 h-5" /> 🎥 CV Vidéo
               </button>
             </div>
           </motion.div>
