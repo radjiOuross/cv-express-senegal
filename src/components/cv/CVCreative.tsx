@@ -57,7 +57,7 @@ const CVCreative = ({ formData, aiData, customization }: Props) => {
 
         {/* Contact */}
         <div style={{ padding: "16px 24px", borderTop: `1px solid rgba(255,255,255,0.15)`, borderBottom: `1px solid rgba(255,255,255,0.15)` }}>
-          <div style={{ fontSize: 10, marginBottom: 6, opacity: 0.85, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Contact</div>
+          <div style={{ fontSize: 10, opacity: 0.85, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12 }}>Contact</div>
           {personal.email && <div style={{ fontSize: 9.5, marginBottom: 8, opacity: 0.9, wordBreak: "break-all" }}>{personal.email}</div>}
           {personal.telephone && <div style={{ fontSize: 9.5, marginBottom: 8, opacity: 0.9 }}>{personal.telephone}</div>}
           {personal.ville && <div style={{ fontSize: 9.5, opacity: 0.9 }}>{personal.ville}</div>}
