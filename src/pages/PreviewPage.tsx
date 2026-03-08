@@ -53,13 +53,10 @@ const PreviewPage = () => {
   };
 
   const templates: { key: TemplateName; label: string; colors: string[]; layout: string }[] = [
-    { key: "classique", label: "Classique", colors: ["#1B3A6B", "#E8B84B", "#fff"], layout: "sidebar" },
-    { key: "moderne", label: "Moderne", colors: ["#00A651", "#007a3d", "#fff"], layout: "header" },
-    { key: "minimaliste", label: "Minimaliste", colors: ["#fafafa", "#222", "#999"], layout: "minimal" },
-    { key: "elegant", label: "Élégant", colors: ["#fff", "#C9A84C", "#333"], layout: "centered" },
-    { key: "audacieux", label: "Audacieux", colors: ["#1a1a2e", "#e94560", "#16213e"], layout: "dark-sidebar" },
-    { key: "nature", label: "Nature", colors: ["#2d6a4f", "#f5f0e8", "#95d5b2"], layout: "nature" },
-    { key: "corporate", label: "Corporate", colors: ["#003580", "#fff", "#e8f0fe"], layout: "corporate" },
+    { key: "executive", label: "Executive", colors: ["#fff", "#1B3A6B", "#eee"], layout: "executive" },
+    { key: "creative", label: "Creative", colors: ["#00A651", "#fff", "#f5f5f5"], layout: "creative" },
+    { key: "prestige", label: "Prestige", colors: ["#fff", "#C9A84C", "#333"], layout: "prestige" },
+    { key: "tech", label: "Tech", colors: ["#0f0f0f", "#00A651", "#161616"], layout: "tech" },
   ];
 
   const renderMiniPreview = (t: typeof templates[0]) => {
