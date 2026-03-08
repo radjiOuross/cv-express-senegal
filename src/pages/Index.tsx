@@ -116,6 +116,9 @@ const Index = () => {
       <nav className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <span className="text-2xl font-bold text-primary tracking-tight">CVExpress</span>
         <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/importer")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:flex items-center gap-1">
+            <Upload className="w-4 h-4" /> Importer un CV
+          </button>
           <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
             Analyser une offre
           </button>
