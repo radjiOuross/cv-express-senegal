@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { loadFormData } from "@/lib/storage";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 const STATUS_MESSAGES = [
@@ -14,6 +15,7 @@ const STATUS_MESSAGES = [
 
 const LoadingPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [msgIndex, setMsgIndex] = useState(0);
 
   useEffect(() => {
@@ -48,6 +50,7 @@ const LoadingPage = () => {
           ai_data: data.aiData as import("@/integrations/supabase/types").Json,
           template: "classique",
           paid: false,
+          ...(user ? { user_id: user.id } : {}),
         });
 
         navigate("/apercu");
