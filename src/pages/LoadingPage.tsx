@@ -50,6 +50,7 @@ const LoadingPage = () => {
           ai_data: data.aiData as import("@/integrations/supabase/types").Json,
           template: "classique",
           paid: false,
+          ...(user ? { user_id: user.id } : {}),
         });
 
         navigate("/apercu");
