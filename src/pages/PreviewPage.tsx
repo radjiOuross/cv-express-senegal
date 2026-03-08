@@ -12,7 +12,9 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
 import CVValidationSection from "@/components/CVValidationSection";
 import CustomizationPanel from "@/components/CustomizationPanel";
-import { Download, FileText, Check, Mail, Search, Palette } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Download, FileText, Check, Mail, Search, Palette, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
