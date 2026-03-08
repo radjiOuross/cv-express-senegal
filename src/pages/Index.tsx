@@ -165,8 +165,8 @@ const Index = () => {
               <button onClick={() => navigate("/creer")} className="btn-primary text-lg flex items-center justify-center gap-2">
                 Créer mon CV <ArrowRight className="w-5 h-5" />
               </button>
-              <button onClick={() => navigate("/analyser")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
-                <Search className="w-5 h-5" /> Analyser une offre
+              <button onClick={() => navigate("/importer")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
+                <Upload className="w-5 h-5" /> Importer un CV existant
               </button>
             </div>
           </motion.div>
