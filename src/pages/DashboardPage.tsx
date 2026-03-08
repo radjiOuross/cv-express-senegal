@@ -81,12 +81,7 @@ const DashboardPage = () => {
   const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
   const userAvatar = user?.user_metadata?.avatar_url;
 
-  // Profile stats
-  const [viewCount, setViewCount] = useState(0);
-  const [profileSlug, setProfileSlug] = useState("");
-  const [hasVideo, setHasVideo] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
+
 
   useEffect(() => {
     if (user && cvs.length > 0) {
