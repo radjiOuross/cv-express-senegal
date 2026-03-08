@@ -166,7 +166,18 @@ const PreviewPage = () => {
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Photo toggle + Action buttons */}
+        <div className="flex items-center gap-3 mb-4">
+          <label className="flex items-center gap-2 cursor-pointer select-none bg-muted/60 rounded-lg px-4 py-2.5 border border-border">
+            <input
+              type="checkbox"
+              checked={customization.photoStyle !== "none"}
+              onChange={(e) => setCustomization(prev => ({ ...prev, photoStyle: e.target.checked ? "rounded" : "none" }))}
+              className="accent-primary w-4 h-4"
+            />
+            <span className="text-sm font-medium text-foreground">📷 Afficher la photo</span>
+          </label>
+        </div>
         <div className="flex gap-3 mb-8 flex-wrap">
           <button onClick={handleDownload} className="btn-primary flex items-center justify-center gap-2 px-6 py-3">
             <Download className="w-5 h-5" /> Télécharger PDF — 2000 FCFA
