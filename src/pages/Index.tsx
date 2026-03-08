@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FileText, Sparkles, Layout, Download, Check, User, LayoutDashboard,
   Mic, Globe, Search, Shield, Mail, Palette, ArrowRight, Star,
-  SlidersHorizontal, Type, Camera, Zap, Lock
+  SlidersHorizontal, Type, Camera, Zap, Lock, Upload, RefreshCw, Target, TrendingUp
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import cvMockup1 from "@/assets/cv-mockup-1.png";
@@ -116,6 +116,9 @@ const Index = () => {
       <nav className="flex items-center justify-between px-6 md:px-12 py-5 sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <span className="text-2xl font-bold text-primary tracking-tight">CVExpress</span>
         <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/importer")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:flex items-center gap-1">
+            <Upload className="w-4 h-4" /> Importer un CV
+          </button>
           <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
             Analyser une offre
           </button>
@@ -162,8 +165,8 @@ const Index = () => {
               <button onClick={() => navigate("/creer")} className="btn-primary text-lg flex items-center justify-center gap-2">
                 Créer mon CV <ArrowRight className="w-5 h-5" />
               </button>
-              <button onClick={() => navigate("/analyser")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
-                <Search className="w-5 h-5" /> Analyser une offre
+              <button onClick={() => navigate("/importer")} className="px-8 py-4 rounded-xl border border-border text-foreground font-semibold hover:bg-card transition-all flex items-center justify-center gap-2">
+                <Upload className="w-5 h-5" /> Importer un CV existant
               </button>
             </div>
           </motion.div>
@@ -205,8 +208,107 @@ const Index = () => {
           </div>
         </div>
       </section>
+      {/* Import CV Section */}
+      <section className="px-6 md:px-12 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <div className="inline-flex items-center gap-2 bg-accent/10 text-accent text-sm font-medium px-4 py-2 rounded-full mb-6">
+                <Upload className="w-4 h-4" /> Nouvelle fonctionnalité
+              </div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
+                Tu as déjà un CV ?<br />
+                <span className="text-primary">Améliore-le avec l'IA</span>
+              </h2>
+              <p className="text-muted-foreground text-lg mb-8 max-w-lg">
+                Importe ton CV existant (PDF, DOCX ou image) et notre IA l'analyse en profondeur. 
+                Elle extrait tes données, évalue la qualité et te donne des recommandations concrètes 
+                pour le rendre irrésistible aux recruteurs.
+              </p>
 
-      {/* Features Grid */}
+              <div className="space-y-4 mb-8">
+                {[
+                  { icon: Upload, title: "Upload ton ancien CV", desc: "PDF, Word ou même une photo — l'IA lit tout" },
+                  { icon: Target, title: "Score de qualité instantané", desc: "Découvre les points forts et les faiblesses de ton CV" },
+                  { icon: TrendingUp, title: "Recommandations personnalisées", desc: "Reçois des conseils précis : sections manquantes, formulations à améliorer" },
+                  { icon: RefreshCw, title: "Régénère en un clic", desc: "Applique les améliorations et génère un nouveau CV optimisé" },
+                ].map((item, i) => (
+                  <motion.div key={item.title} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <button onClick={() => navigate("/importer")} className="btn-primary text-lg flex items-center gap-2">
+                <Upload className="w-5 h-5" /> Importer mon CV <ArrowRight className="w-5 h-5" />
+              </button>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Analyse IA</h4>
+                    <p className="text-xs text-muted-foreground">Score de ton CV</p>
+                  </div>
+                  <div className="ml-auto">
+                    <span className="text-3xl font-bold text-primary">72%</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  {[
+                    { type: "✅", label: "Expériences bien détaillées", color: "border-l-primary" },
+                    { type: "⚠️", label: "Ajoute un résumé professionnel", color: "border-l-orange-400" },
+                    { type: "⚠️", label: "Manque de verbes d'action", color: "border-l-orange-400" },
+                    { type: "💡", label: "Ajoute tes certifications", color: "border-l-blue-400" },
+                    { type: "❌", label: "Section langues absente", color: "border-l-destructive" },
+                  ].map((item, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, x: 10 }} whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }} transition={{ delay: 0.3 + i * 0.1 }}
+                      className={`bg-muted/50 rounded-lg p-3 border-l-4 ${item.color} flex items-center gap-2`}
+                    >
+                      <span>{item.type}</span>
+                      <span className="text-sm text-foreground">{item.label}</span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="flex-1 bg-primary/10 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-primary">3</p>
+                    <p className="text-xs text-muted-foreground">Améliorations</p>
+                  </div>
+                  <div className="flex-1 bg-orange-500/10 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-orange-500">2</p>
+                    <p className="text-xs text-muted-foreground">Manquants</p>
+                  </div>
+                  <div className="flex-1 bg-blue-500/10 rounded-lg p-3 text-center">
+                    <p className="text-2xl font-bold text-blue-500">1</p>
+                    <p className="text-xs text-muted-foreground">Conseil</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+
       <section className="px-6 md:px-12 py-20">
         <div className="max-w-6xl mx-auto">
           <h2 className="section-title text-center mb-4">Toutes les fonctionnalités</h2>
