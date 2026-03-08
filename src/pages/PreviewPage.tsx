@@ -4,13 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { loadFormData } from "@/lib/storage";
 import { FormData, AIData, TemplateName } from "@/types/cv";
 import { CVCustomization, loadCustomization, saveCustomization } from "@/types/customization";
-import CVClassique from "@/components/cv/CVClassique";
-import CVModerne from "@/components/cv/CVModerne";
-import CVMinimaliste from "@/components/cv/CVMinimaliste";
-import CVElegant from "@/components/cv/CVElegant";
-import CVAudacieux from "@/components/cv/CVAudacieux";
-import CVNature from "@/components/cv/CVNature";
-import CVCorporate from "@/components/cv/CVCorporate";
+import CVExecutive from "@/components/cv/CVExecutive";
+import CVCreative from "@/components/cv/CVCreative";
+import CVPrestige from "@/components/cv/CVPrestige";
+import CVTech from "@/components/cv/CVTech";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import CoverLetterModal from "@/components/CoverLetterModal";
 import CVValidationSection from "@/components/CVValidationSection";
@@ -19,7 +16,7 @@ import { Download, FileText, Check, Mail, Search, Palette } from "lucide-react";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
-  const [template, setTemplate] = useState<TemplateName>("classique");
+  const [template, setTemplate] = useState<TemplateName>("executive");
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("fr");
   const [panelOpen, setPanelOpen] = useState(false);
@@ -56,64 +53,44 @@ const PreviewPage = () => {
   };
 
   const templates: { key: TemplateName; label: string; colors: string[]; layout: string }[] = [
-    { key: "classique", label: "Classique", colors: ["#1B3A6B", "#E8B84B", "#fff"], layout: "sidebar" },
-    { key: "moderne", label: "Moderne", colors: ["#00A651", "#007a3d", "#fff"], layout: "header" },
-    { key: "minimaliste", label: "Minimaliste", colors: ["#fafafa", "#222", "#999"], layout: "minimal" },
-    { key: "elegant", label: "Élégant", colors: ["#fff", "#C9A84C", "#333"], layout: "centered" },
-    { key: "audacieux", label: "Audacieux", colors: ["#1a1a2e", "#e94560", "#16213e"], layout: "dark-sidebar" },
-    { key: "nature", label: "Nature", colors: ["#2d6a4f", "#f5f0e8", "#95d5b2"], layout: "nature" },
-    { key: "corporate", label: "Corporate", colors: ["#003580", "#fff", "#e8f0fe"], layout: "corporate" },
+    { key: "executive", label: "Executive", colors: ["#fff", "#1B3A6B", "#eee"], layout: "executive" },
+    { key: "creative", label: "Creative", colors: ["#00A651", "#fff", "#f5f5f5"], layout: "creative" },
+    { key: "prestige", label: "Prestige", colors: ["#fff", "#C9A84C", "#333"], layout: "prestige" },
+    { key: "tech", label: "Tech", colors: ["#0f0f0f", "#00A651", "#161616"], layout: "tech" },
   ];
 
   const renderMiniPreview = (t: typeof templates[0]) => {
     const [c1, c2, c3] = t.colors;
-    if (t.layout === "sidebar") {
+    if (t.layout === "executive") {
+      return (<>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 3, backgroundColor: c2 }} />
+        <div style={{ position: "absolute", left: 10, top: 10, width: "50%", height: 5, backgroundColor: c2, borderRadius: 1 }} />
+        <div style={{ position: "absolute", left: 10, top: 22, width: "35%", height: 2, backgroundColor: "#ddd" }} />
+        <div style={{ position: "absolute", right: 8, top: 35, width: "25%", height: 50, backgroundColor: c3, borderRadius: 2 }} />
+      </>);
+    }
+    if (t.layout === "creative") {
       return (<>
         <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c1 }} />
-        <div style={{ position: "absolute", left: "15%", top: 8, width: 10, height: 10, borderRadius: "50%", border: `1px solid ${c2}` }} />
-        <div style={{ position: "absolute", right: 8, top: 10, width: "50%", height: 3, backgroundColor: c1, borderRadius: 1 }} />
-        <div style={{ position: "absolute", right: 8, top: 18, width: "45%", height: 2, backgroundColor: "#ddd", borderRadius: 1 }} />
+        <div style={{ position: "absolute", left: "12%", top: 12, width: 16, height: 16, borderRadius: "50%", backgroundColor: "#fff" }} />
+        <div style={{ position: "absolute", right: 10, top: 14, width: "45%", height: 3, backgroundColor: c1, borderRadius: 1 }} />
+        <div style={{ position: "absolute", right: 10, top: 24, width: "40%", height: 2, backgroundColor: "#ddd" }} />
       </>);
     }
-    if (t.layout === "header") {
+    if (t.layout === "prestige") {
       return (<>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "25%", background: `linear-gradient(135deg, ${c1}, ${c2})` }} />
-        <div style={{ position: "absolute", left: 8, top: 30, width: "40%", height: 2, backgroundColor: c1 }} />
-        <div style={{ position: "absolute", right: 8, top: 30, width: "40%", height: 2, backgroundColor: c1 }} />
+        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 3, background: `linear-gradient(90deg, ${c2}, #ddd, ${c2})` }} />
+        <div style={{ position: "absolute", left: "25%", right: "25%", top: 14, height: 5, backgroundColor: c3, borderRadius: 1 }} />
+        <div style={{ position: "absolute", left: "30%", right: "30%", top: 24, height: 1, backgroundColor: c2 }} />
+        <div style={{ position: "absolute", left: 12, top: 35, width: 3, height: 50, backgroundColor: c2, borderRadius: 1 }} />
       </>);
     }
-    if (t.layout === "minimal") {
-      return (<>
-        <div style={{ position: "absolute", left: 10, top: 10, width: "60%", height: 5, backgroundColor: c2 }} />
-        <div style={{ position: "absolute", left: 0, right: 0, top: 22, height: 1, backgroundColor: c2 }} />
-        <div style={{ position: "absolute", left: 8, top: 28, width: "30%", height: 2, backgroundColor: c3 }} />
-      </>);
-    }
-    if (t.layout === "centered") {
-      return (<>
-        <div style={{ position: "absolute", left: 10, right: 10, top: 6, height: 1, backgroundColor: c2 }} />
-        <div style={{ position: "absolute", left: "25%", right: "25%", top: 12, height: 4, backgroundColor: c3, borderRadius: 1 }} />
-        <div style={{ position: "absolute", left: 10, right: 10, top: 28, height: 1, backgroundColor: c2 }} />
-      </>);
-    }
-    if (t.layout === "dark-sidebar") {
-      return (<>
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, right: 0, backgroundColor: c1 }} />
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c3 }} />
-        <div style={{ position: "absolute", left: "42%", top: 10, width: "50%", height: 3, backgroundColor: c2, borderRadius: 1 }} />
-      </>);
-    }
-    if (t.layout === "nature") {
-      return (<>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "22%", backgroundColor: c1 }} />
-        <div style={{ position: "absolute", left: 0, right: 0, top: "22%", bottom: 0, backgroundColor: c2 }} />
-        <div style={{ position: "absolute", left: 6, top: 28, width: "35%", height: 60, backgroundColor: "#fff", borderRadius: 4 }} />
-      </>);
-    }
+    // tech
     return (<>
-      <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "20%", backgroundColor: c1 }} />
-      <div style={{ position: "absolute", left: 10, top: 24, height: 5, borderRadius: 2, backgroundColor: c1, width: "35%" }} />
-      <div style={{ position: "absolute", left: 10, top: 34, width: "25%", height: 10, backgroundColor: c3, borderRadius: 3 }} />
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, right: 0, backgroundColor: c1 }} />
+      <div style={{ position: "absolute", left: 8, top: 10, width: "45%", height: 4, backgroundColor: c2, borderRadius: 1 }} />
+      <div style={{ position: "absolute", left: 8, top: 20, width: "35%", height: 2, backgroundColor: "#333" }} />
+      <div style={{ position: "absolute", right: 6, top: 34, width: "28%", height: 55, backgroundColor: c3, borderRadius: 4 }} />
     </>);
   };
 
@@ -217,13 +194,10 @@ const PreviewPage = () => {
                 transition={{ duration: 0.25 }}
                 ref={cvRef}
               >
-                {template === "classique" && <CVClassique {...cvProps} />}
-                {template === "moderne" && <CVModerne {...cvProps} />}
-                {template === "minimaliste" && <CVMinimaliste {...cvProps} />}
-                {template === "elegant" && <CVElegant {...cvProps} />}
-                {template === "audacieux" && <CVAudacieux {...cvProps} />}
-                {template === "nature" && <CVNature {...cvProps} />}
-                {template === "corporate" && <CVCorporate {...cvProps} />}
+                {template === "executive" && <CVExecutive {...cvProps} />}
+                {template === "creative" && <CVCreative {...cvProps} />}
+                {template === "prestige" && <CVPrestige {...cvProps} />}
+                {template === "tech" && <CVTech {...cvProps} />}
               </motion.div>
             </AnimatePresence>
           </div>
