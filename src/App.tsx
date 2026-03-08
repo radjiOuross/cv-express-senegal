@@ -18,15 +18,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/creer" element={<FormPage />} />
-            <Route path="/generation" element={<LoadingPage />} />
-            <Route path="/apercu" element={<PreviewPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AnimatePresence>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/creer" element={<FormPage />} />
+          <Route path="/generation" element={<LoadingPage />} />
+          <Route path="/apercu" element={<PreviewPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
