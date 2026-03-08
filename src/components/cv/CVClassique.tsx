@@ -1,6 +1,6 @@
 import { FormData, AIData } from "@/types/cv";
 import { CVCustomization, getDensityStyles, getPhotoStyle } from "@/types/customization";
-import { renderSkills, isSectionVisible, getOrderedSections } from "./cvUtils";
+import { renderSkills, getOrderedSections } from "./cvUtils";
 
 interface Props {
   formData: FormData;
@@ -35,24 +35,22 @@ const CVClassique = ({ formData, aiData, customization }: Props) => {
       case "skills":
         return skills.length > 0 ? (
           <div key={id} style={{ marginBottom: density.margin * 2 }}>
-            <h3 style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, color: sc }}>Compétences</h3>
-            <div style={{ color: "#fff" }}>{renderSkills(skills, customization.skillStyle, sc)}</div>
+            <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14, color: sc, borderBottom: `1px solid ${sc}40`, paddingBottom: 6 }}>Compétences</h3>
+            <div style={{ color: "rgba(255,255,255,0.9)" }}>{renderSkills(skills, customization.skillStyle, sc)}</div>
           </div>
         ) : null;
       case "languages":
         return langues.length > 0 ? (
           <div key={id}>
-            <h3 style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, color: sc }}>Langues</h3>
+            <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14, color: sc, borderBottom: `1px solid ${sc}40`, paddingBottom: 6 }}>Langues</h3>
             {langues.map((l, i) => (
-              <div key={i} style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 10, marginBottom: 4 }}>{l.langue}</div>
-                <div style={{ display: "flex", gap: 3 }}>
-                  {[1, 2, 3, 4, 5].map((dot) => (
-                    <div key={dot} style={{
-                      width: 8, height: 8, borderRadius: "50%",
-                      backgroundColor: dot <= Math.ceil(levelToWidth(l.niveau) / 20) ? sc : "rgba(255,255,255,0.2)"
-                    }} />
-                  ))}
+              <div key={i} style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ fontSize: 10, fontWeight: 500 }}>{l.langue}</span>
+                  <span style={{ fontSize: 9, color: "rgba(255,255,255,0.6)" }}>{l.niveau}</span>
+                </div>
+                <div style={{ height: 3, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 2 }}>
+                  <div style={{ height: "100%", width: `${levelToWidth(l.niveau)}%`, backgroundColor: sc, borderRadius: 2, transition: "width 0.3s" }} />
                 </div>
               </div>
             ))}
@@ -68,19 +66,22 @@ const CVClassique = ({ formData, aiData, customization }: Props) => {
       case "summary":
         return summary ? (
           <div key={id} style={{ marginBottom: density.margin * 2 }}>
-            <h2 style={{ fontSize: 11, textTransform: "uppercase", color: pc, letterSpacing: 2, marginBottom: 8, borderBottom: `2px solid ${pc}`, paddingBottom: 4 }}>Profil</h2>
-            <p style={{ fontSize: 11, lineHeight: density.lineHeight, color: "#444" }}>{summary}</p>
+            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: pc, letterSpacing: 1.5, marginBottom: 10, paddingBottom: 6, borderBottom: `2.5px solid ${pc}` }}>Profil professionnel</h2>
+            <p style={{ fontSize: 10.5, lineHeight: density.lineHeight, color: "#444", textAlign: "justify" }}>{summary}</p>
           </div>
         ) : null;
       case "experiences":
         return experiences.length > 0 ? (
           <div key={id} style={{ marginBottom: density.margin * 2 }}>
-            <h2 style={{ fontSize: 11, textTransform: "uppercase", color: pc, letterSpacing: 2, marginBottom: 12, borderBottom: `2px solid ${pc}`, paddingBottom: 4 }}>Expériences</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: pc, letterSpacing: 1.5, marginBottom: 14, paddingBottom: 6, borderBottom: `2.5px solid ${pc}` }}>Expérience professionnelle</h2>
             {experiences.map((exp, i) => (
-              <div key={i} style={{ marginBottom: density.margin, paddingLeft: 16, borderLeft: `2px solid ${pc}` }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: pc }}>{exp.poste}</div>
-                <div style={{ fontSize: 10, color: "#666", marginBottom: 4 }}>{exp.entreprise} • {exp.dateDebut} — {exp.dateFin}</div>
-                <p style={{ fontSize: 10, lineHeight: density.lineHeight, color: "#444" }}>{exp.description}</p>
+              <div key={i} style={{ marginBottom: density.margin * 1.2, paddingLeft: 14, borderLeft: `3px solid ${pc}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 2 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a" }}>{exp.poste}</span>
+                  <span style={{ fontSize: 9, color: "#888", whiteSpace: "nowrap", fontStyle: "italic" }}>{exp.dateDebut} — {exp.dateFin}</span>
+                </div>
+                <div style={{ fontSize: 10.5, color: pc, fontWeight: 600, marginBottom: 4 }}>{exp.entreprise}</div>
+                <p style={{ fontSize: 10, lineHeight: density.lineHeight, color: "#555", textAlign: "justify" }}>{exp.description}</p>
               </div>
             ))}
           </div>
@@ -88,11 +89,14 @@ const CVClassique = ({ formData, aiData, customization }: Props) => {
       case "formation":
         return formation.length > 0 ? (
           <div key={id} style={{ marginBottom: density.margin * 2 }}>
-            <h2 style={{ fontSize: 11, textTransform: "uppercase", color: pc, letterSpacing: 2, marginBottom: 12, borderBottom: `2px solid ${pc}`, paddingBottom: 4 }}>Formation</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: pc, letterSpacing: 1.5, marginBottom: 14, paddingBottom: 6, borderBottom: `2.5px solid ${pc}` }}>Formation</h2>
             {formation.map((f, i) => (
-              <div key={i} style={{ marginBottom: density.margin }}>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{f.diplome}</div>
-                <div style={{ fontSize: 10, color: "#666" }}>{f.ecole} • {f.annee}{f.mention ? ` • ${f.mention}` : ""}</div>
+              <div key={i} style={{ marginBottom: density.margin, paddingLeft: 14, borderLeft: `3px solid ${pc}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>{f.diplome}</span>
+                  <span style={{ fontSize: 9, color: "#888", fontStyle: "italic" }}>{f.annee}</span>
+                </div>
+                <div style={{ fontSize: 10, color: "#666" }}>{f.ecole}{f.mention ? ` — ${f.mention}` : ""}</div>
               </div>
             ))}
           </div>
@@ -100,8 +104,8 @@ const CVClassique = ({ formData, aiData, customization }: Props) => {
       case "interests":
         return formData.interests ? (
           <div key={id} style={{ marginBottom: density.margin * 2 }}>
-            <h2 style={{ fontSize: 11, textTransform: "uppercase", color: pc, letterSpacing: 2, marginBottom: 8, borderBottom: `2px solid ${pc}`, paddingBottom: 4 }}>Centres d'intérêt</h2>
-            <p style={{ fontSize: 10, lineHeight: density.lineHeight, color: "#444" }}>{formData.interests}</p>
+            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", color: pc, letterSpacing: 1.5, marginBottom: 10, paddingBottom: 6, borderBottom: `2.5px solid ${pc}` }}>Centres d'intérêt</h2>
+            <p style={{ fontSize: 10, lineHeight: density.lineHeight, color: "#555" }}>{formData.interests}</p>
           </div>
         ) : null;
       default:
@@ -112,31 +116,46 @@ const CVClassique = ({ formData, aiData, customization }: Props) => {
   return (
     <div style={{ width: 794, minHeight: 1123, display: "flex", fontFamily: bodyFont, fontSize: 11 }}>
       {/* Sidebar */}
-      <div style={{ width: 280, backgroundColor: pc, color: "white", padding: `${density.padding * 2.5}px ${density.padding * 1.5}px`, flexShrink: 0 }}>
+      <div style={{ width: 270, backgroundColor: pc, color: "white", padding: "40px 24px", flexShrink: 0, display: "flex", flexDirection: "column" }}>
         {customization.photoStyle !== "none" && personal.photo && (
-          <div style={{ ...getPhotoStyle(customization.photoStyle, 120, sc, customization.photoBorder), margin: "0 auto 20px" }}>
+          <div style={{ ...getPhotoStyle(customization.photoStyle, 110, sc, customization.photoBorder), margin: "0 auto 20px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}>
             <img src={personal.photo} alt="Photo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
         )}
-        <h1 style={{ fontFamily: displayFont, fontSize: 20, fontWeight: 700, color: sc, textAlign: "center", marginBottom: 4 }}>
-          {personal.prenom} {personal.nom}
+        <h1 style={{ fontFamily: displayFont, fontSize: 22, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.2, marginBottom: 4 }}>
+          {personal.prenom}<br />{personal.nom}
         </h1>
-        <p style={{ textAlign: "center", fontSize: 12, color: sc, opacity: 0.8, marginBottom: 30 }}>
+        <p style={{ textAlign: "center", fontSize: 11, color: sc, fontWeight: 500, textTransform: "uppercase", letterSpacing: 1, marginBottom: 28 }}>
           {personal.poste}
         </p>
 
-        <div style={{ marginBottom: 30 }}>
-          <h3 style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, color: sc }}>Contact</h3>
-          {personal.email && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 10 }}>✉ {personal.email}</div>}
-          {personal.telephone && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 10 }}>📞 {personal.telephone}</div>}
-          {personal.ville && <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 10 }}>📍 {personal.ville}</div>}
+        <div style={{ marginBottom: 28 }}>
+          <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14, color: sc, borderBottom: `1px solid ${sc}40`, paddingBottom: 6 }}>Contact</h3>
+          {personal.email && (
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, fontSize: 10 }}>
+              <span style={{ color: sc, fontWeight: 700, fontSize: 12, lineHeight: 1 }}>@</span>
+              <span style={{ wordBreak: "break-all", lineHeight: 1.4, color: "rgba(255,255,255,0.9)" }}>{personal.email}</span>
+            </div>
+          )}
+          {personal.telephone && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, fontSize: 10 }}>
+              <span style={{ color: sc, fontWeight: 700, fontSize: 11 }}>T</span>
+              <span style={{ color: "rgba(255,255,255,0.9)" }}>{personal.telephone}</span>
+            </div>
+          )}
+          {personal.ville && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, fontSize: 10 }}>
+              <span style={{ color: sc, fontWeight: 700, fontSize: 11 }}>A</span>
+              <span style={{ color: "rgba(255,255,255,0.9)" }}>{personal.ville}</span>
+            </div>
+          )}
         </div>
 
         {sidebarSections.map(renderSidebarSection)}
       </div>
 
       {/* Main */}
-      <div style={{ flex: 1, padding: `${density.padding * 2.5}px ${density.padding * 2}px`, backgroundColor: "white", color: "#1a1a1a" }}>
+      <div style={{ flex: 1, padding: "40px 32px", backgroundColor: "white", color: "#1a1a1a" }}>
         {mainSections.map(renderMainSection)}
       </div>
     </div>
