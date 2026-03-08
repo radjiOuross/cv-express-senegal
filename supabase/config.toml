@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.ai-parse-cv]
 verify_jwt = false
+
+[functions.reactive-resume-export]
+verify_jwt = false
