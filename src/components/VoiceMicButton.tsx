@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Mic, MicOff, Loader2, MessageSquare, X } from "lucide-react";
+import { Mic, MicOff, Loader2, MessageSquare, X, Square } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -9,15 +9,13 @@ interface Props {
   onResult: (data: Record<string, string>) => void;
 }
 
-const hasSpeechRecognition = () =>
-  !!(((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition));
-
 const VoiceMicButton = ({ type, onResult }: Props) => {
-  const [listening, setListening] = useState(false);
+  const [recording, setRecording] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [showTextInput, setShowTextInput] = useState(false);
   const [textValue, setTextValue] = useState("");
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const parseWithAI = async (transcript: string) => {
     setProcessing(true);
@@ -46,52 +44,97 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
     }
   };
 
-  const startVoice = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "fr-FR";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognitionRef.current = recognition;
-
-    recognition.onstart = () => setListening(true);
-    recognition.onerror = (event: any) => {
-      console.error("SpeechRecognition error:", event.error);
-      setListening(false);
-      if (event.error === "network" || event.error === "service-not-available") {
-        toast({ title: "Vocal indisponible", description: "Utilise le mode texte à la place.", variant: "destructive" });
-        setShowTextInput(true);
-      } else {
-        const msgs: Record<string, string> = {
-          "not-allowed": "Autorise l'accès au microphone.",
-          "no-speech": "Aucune voix détectée. Réessaie.",
-          "audio-capture": "Aucun microphone détecté.",
-        };
-        toast({ title: "Erreur", description: msgs[event.error] || `Erreur: ${event.error}`, variant: "destructive" });
-      }
-    };
-    recognition.onend = () => setListening(false);
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      console.log("Voice transcript:", transcript);
-      setListening(false);
-      parseWithAI(transcript);
-    };
-
+  const startRecording = async () => {
     try {
-      recognition.start();
-    } catch {
-      toast({ title: "Erreur", description: "Impossible de démarrer. Utilise le mode texte.", variant: "destructive" });
-      setShowTextInput(true);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
+
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+        ? "audio/mp4"
+        : "audio/ogg";
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      chunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        // Stop all tracks
+        stream.getTracks().forEach((t) => t.stop());
+
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        chunksRef.current = [];
+
+        if (blob.size < 1000) {
+          toast({ title: "Enregistrement trop court", description: "Parle plus longtemps et réessaie." });
+          return;
+        }
+
+        // Convert to base64 and send for transcription
+        setProcessing(true);
+        try {
+          const base64 = await blobToBase64(blob);
+          const { data, error } = await supabase.functions.invoke("ai-voice-parse", {
+            body: { audio: base64, mimeType, type },
+          });
+          if (error) throw error;
+          if (data?.parsed && Object.values(data.parsed).some((v) => v)) {
+            onResult(data.parsed);
+            toast({ title: "✅ Champs remplis automatiquement !" });
+          } else {
+            toast({
+              title: "Aucune info extraite",
+              description: "Parle plus clairement. Ex: 'Je m'appelle Amadou Diallo, développeur à Dakar'",
+            });
+          }
+        } catch (err) {
+          console.error("Transcription error:", err);
+          toast({ title: "Erreur", description: "Erreur lors de la transcription. Réessaie.", variant: "destructive" });
+        } finally {
+          setProcessing(false);
+        }
+      };
+
+      mediaRecorderRef.current = recorder;
+      recorder.start(1000);
+      setRecording(true);
+    } catch (err: any) {
+      console.error("Microphone error:", err);
+      if (err.name === "NotAllowedError") {
+        toast({
+          title: "Accès micro refusé",
+          description: "Autorise l'accès au microphone dans les paramètres de ton navigateur.",
+          variant: "destructive",
+        });
+      } else if (err.name === "NotFoundError") {
+        toast({
+          title: "Aucun micro détecté",
+          description: "Connecte un microphone et réessaie.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Impossible d'accéder au micro. Utilise le mode texte.",
+          variant: "destructive",
+        });
+        setShowTextInput(true);
+      }
     }
   };
 
-  const stopVoice = () => {
-    recognitionRef.current?.stop();
-    setListening(false);
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    setRecording(false);
   };
 
   const handleTextSubmit = () => {
@@ -105,42 +148,54 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
 
   return (
     <div className="space-y-2">
-      <div className="inline-flex items-center gap-2 flex-wrap">
-        {/* Text mode button — always available */}
+      <div className="inline-flex items-center gap-3 flex-wrap">
+        {/* Voice recording — universal via MediaRecorder */}
+        <button
+          onClick={recording ? stopRecording : startRecording}
+          disabled={processing}
+          type="button"
+          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            recording
+              ? "bg-destructive text-destructive-foreground"
+              : "bg-primary/10 text-primary hover:bg-primary/20"
+          } disabled:opacity-50`}
+        >
+          {processing ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : recording ? (
+            <Square className="w-3 h-3 fill-current" />
+          ) : (
+            <Mic className="w-4 h-4" />
+          )}
+          {recording ? "⏹ Arrêter" : processing ? "Analyse..." : "🎤 Dicter"}
+        </button>
+
+        {/* Text mode button */}
         <button
           onClick={() => setShowTextInput(!showTextInput)}
           disabled={processing}
           type="button"
-          className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-medium hover:text-primary disabled:opacity-50"
         >
           <MessageSquare className="w-4 h-4" />
-          📝 Remplir avec une description
+          📝 Écrire
         </button>
 
-        {/* Voice mode button — only if supported */}
-        {hasSpeechRecognition() && (
-          <button
-            onClick={listening ? stopVoice : startVoice}
-            disabled={processing}
-            type="button"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-medium hover:text-primary disabled:opacity-50"
-          >
-            {listening ? <MicOff className="w-4 h-4 text-destructive" /> : <Mic className="w-4 h-4" />}
-            {listening ? "Arrêter" : "🎤 Vocal"}
-          </button>
-        )}
-
-        {processing && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-
         <AnimatePresence>
-          {listening && (
+          {recording && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: [1, 1.3, 1] }}
-              exit={{ scale: 0 }}
-              transition={{ duration: 1, repeat: Infinity }}
-              className="w-3 h-3 bg-destructive rounded-full"
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="w-3 h-3 bg-destructive rounded-full"
+              />
+              <span className="text-xs text-destructive font-medium">Parle maintenant...</span>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -183,5 +238,19 @@ const VoiceMicButton = ({ type, onResult }: Props) => {
     </div>
   );
 };
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      // Remove data:audio/...;base64, prefix
+      const base64 = result.split(",")[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 
 export default VoiceMicButton;
