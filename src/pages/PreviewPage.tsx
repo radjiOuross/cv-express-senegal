@@ -16,7 +16,7 @@ import { Download, FileText, Check, Mail, Search, Palette } from "lucide-react";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
-  const [template, setTemplate] = useState<TemplateName>("classique");
+  const [template, setTemplate] = useState<TemplateName>("executive");
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("fr");
   const [panelOpen, setPanelOpen] = useState(false);
