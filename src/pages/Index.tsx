@@ -25,9 +25,14 @@ const Index = () => {
       {/* Navbar */}
       <nav className="flex items-center justify-between px-6 md:px-12 py-5">
         <span className="text-2xl font-bold text-primary tracking-tight">CVExpress</span>
-        <button onClick={() => navigate("/creer")} className="btn-primary-sm">
-          Commencer
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Analyser une offre
+          </button>
+          <button onClick={() => navigate("/creer")} className="btn-primary-sm">
+            Commencer
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}
