@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.reactive-resume-export]
 verify_jwt = false
+
+[functions.ai-coach]
+verify_jwt = false
+
+[functions.ai-video-script]
+verify_jwt = false
