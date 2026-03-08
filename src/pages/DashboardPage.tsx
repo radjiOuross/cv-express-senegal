@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { saveFormData } from "@/lib/storage";
 import { FormData } from "@/types/cv";
-import { Loader2, Plus, FileText, Calendar, LogOut, Edit } from "lucide-react";
+import { Loader2, Plus, FileText, Calendar, LogOut, Edit, Globe, Video, Eye, Copy, Check, Settings } from "lucide-react";
+import ProfileSettings from "@/components/ProfileSettings";
 
 interface CVRow {
   id: string;
