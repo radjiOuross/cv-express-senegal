@@ -10,16 +10,22 @@ import CVElegant from "@/components/cv/CVElegant";
 import CVAudacieux from "@/components/cv/CVAudacieux";
 import CVNature from "@/components/cv/CVNature";
 import CVCorporate from "@/components/cv/CVCorporate";
-import { Download, FileText, Check } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import CoverLetterModal from "@/components/CoverLetterModal";
+import CVValidationSection from "@/components/CVValidationSection";
+import { Download, FileText, Check, Mail, Search } from "lucide-react";
 
 const PreviewPage = () => {
   const navigate = useNavigate();
   const [template, setTemplate] = useState<TemplateName>("classique");
+  const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState("fr");
   const cvRef = useRef<HTMLDivElement>(null);
 
   const formData = loadFormData() as FormData;
   const aiDataRaw = localStorage.getItem("cvexpress_ai_data");
-  const aiData: AIData | null = aiDataRaw ? JSON.parse(aiDataRaw) : null;
+  const originalAiData: AIData | null = aiDataRaw ? JSON.parse(aiDataRaw) : null;
+  const [aiData, setAiData] = useState<AIData | null>(originalAiData);
 
   if (!formData?.personal?.prenom) {
     navigate("/creer");
@@ -32,7 +38,7 @@ const PreviewPage = () => {
     html2pdf()
       .set({
         margin: 0,
-        filename: `CV_${formData.personal.prenom}_${formData.personal.nom}.pdf`,
+        filename: `CV_${formData.personal.prenom}_${formData.personal.nom}${currentLang !== "fr" ? `_${currentLang}` : ""}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -54,118 +60,89 @@ const PreviewPage = () => {
   const renderMiniPreview = (t: typeof templates[0]) => {
     const [c1, c2, c3] = t.colors;
     if (t.layout === "sidebar") {
-      return (
-        <>
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c1 }} />
-          <div style={{ position: "absolute", left: "15%", top: 8, width: 10, height: 10, borderRadius: "50%", border: `1px solid ${c2}` }} />
-          <div style={{ position: "absolute", right: 8, top: 10, width: "50%", height: 3, backgroundColor: c1, borderRadius: 1 }} />
-          <div style={{ position: "absolute", right: 8, top: 18, width: "45%", height: 2, backgroundColor: "#ddd", borderRadius: 1 }} />
-          <div style={{ position: "absolute", right: 8, top: 24, width: "48%", height: 2, backgroundColor: "#ddd", borderRadius: 1 }} />
-        </>
-      );
+      return (<>
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c1 }} />
+        <div style={{ position: "absolute", left: "15%", top: 8, width: 10, height: 10, borderRadius: "50%", border: `1px solid ${c2}` }} />
+        <div style={{ position: "absolute", right: 8, top: 10, width: "50%", height: 3, backgroundColor: c1, borderRadius: 1 }} />
+        <div style={{ position: "absolute", right: 8, top: 18, width: "45%", height: 2, backgroundColor: "#ddd", borderRadius: 1 }} />
+      </>);
     }
     if (t.layout === "header") {
-      return (
-        <>
-          <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "25%", background: `linear-gradient(135deg, ${c1}, ${c2})` }} />
-          <div style={{ position: "absolute", left: 8, top: 30, width: "40%", height: 2, backgroundColor: c1 }} />
-          <div style={{ position: "absolute", left: 8, top: 36, width: "35%", height: 2, backgroundColor: "#ddd" }} />
-          <div style={{ position: "absolute", right: 8, top: 30, width: "40%", height: 2, backgroundColor: c1 }} />
-          <div style={{ position: "absolute", right: 8, top: 36, width: "35%", height: 2, backgroundColor: "#ddd" }} />
-        </>
-      );
+      return (<>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "25%", background: `linear-gradient(135deg, ${c1}, ${c2})` }} />
+        <div style={{ position: "absolute", left: 8, top: 30, width: "40%", height: 2, backgroundColor: c1 }} />
+        <div style={{ position: "absolute", right: 8, top: 30, width: "40%", height: 2, backgroundColor: c1 }} />
+      </>);
     }
     if (t.layout === "minimal") {
-      return (
-        <>
-          <div style={{ position: "absolute", left: 10, top: 10, width: "60%", height: 5, backgroundColor: c2 }} />
-          <div style={{ position: "absolute", left: 0, right: 0, top: 22, height: 1, backgroundColor: c2 }} />
-          <div style={{ position: "absolute", left: 8, top: 28, width: "30%", height: 2, backgroundColor: c3 }} />
-          <div style={{ position: "absolute", right: 8, top: 28, width: "50%", height: 2, backgroundColor: "#ddd" }} />
-        </>
-      );
+      return (<>
+        <div style={{ position: "absolute", left: 10, top: 10, width: "60%", height: 5, backgroundColor: c2 }} />
+        <div style={{ position: "absolute", left: 0, right: 0, top: 22, height: 1, backgroundColor: c2 }} />
+        <div style={{ position: "absolute", left: 8, top: 28, width: "30%", height: 2, backgroundColor: c3 }} />
+      </>);
     }
     if (t.layout === "centered") {
-      return (
-        <>
-          <div style={{ position: "absolute", left: 10, right: 10, top: 6, height: 1, backgroundColor: c2 }} />
-          <div style={{ position: "absolute", left: "25%", right: "25%", top: 12, height: 4, backgroundColor: c3, borderRadius: 1 }} />
-          <div style={{ position: "absolute", left: "30%", right: "30%", top: 20, height: 2, backgroundColor: "#ccc" }} />
-          <div style={{ position: "absolute", left: 10, right: 10, top: 28, height: 1, backgroundColor: c2 }} />
-          <div style={{ position: "absolute", left: 8, top: 34, width: "28%", height: 2, backgroundColor: "#ddd" }} />
-          <div style={{ position: "absolute", left: "36%", top: 34, width: "28%", height: 2, backgroundColor: "#ddd" }} />
-          <div style={{ position: "absolute", right: 8, top: 34, width: "28%", height: 2, backgroundColor: "#ddd" }} />
-        </>
-      );
+      return (<>
+        <div style={{ position: "absolute", left: 10, right: 10, top: 6, height: 1, backgroundColor: c2 }} />
+        <div style={{ position: "absolute", left: "25%", right: "25%", top: 12, height: 4, backgroundColor: c3, borderRadius: 1 }} />
+        <div style={{ position: "absolute", left: 10, right: 10, top: 28, height: 1, backgroundColor: c2 }} />
+      </>);
     }
     if (t.layout === "dark-sidebar") {
-      return (
-        <>
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, right: 0, backgroundColor: c1 }} />
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c3 }} />
-          <div style={{ position: "absolute", left: "12%", top: 10, width: 12, height: 12, borderRadius: "50%", border: `1.5px solid ${c2}` }} />
-          <div style={{ position: "absolute", left: "42%", top: 10, width: "50%", height: 3, backgroundColor: c2, borderRadius: 1 }} />
-          <div style={{ position: "absolute", left: "42%", top: 18, width: "45%", height: 2, backgroundColor: "#444", borderRadius: 1 }} />
-        </>
-      );
+      return (<>
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, right: 0, backgroundColor: c1 }} />
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "35%", backgroundColor: c3 }} />
+        <div style={{ position: "absolute", left: "42%", top: 10, width: "50%", height: 3, backgroundColor: c2, borderRadius: 1 }} />
+      </>);
     }
     if (t.layout === "nature") {
-      return (
-        <>
-          <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "22%", backgroundColor: c1 }} />
-          <div style={{ position: "absolute", left: 0, right: 0, top: "22%", bottom: 0, backgroundColor: c2 }} />
-          <div style={{ position: "absolute", left: 6, top: 28, width: "35%", height: 60, backgroundColor: "#fff", borderRadius: 4 }} />
-          <div style={{ position: "absolute", right: 8, top: 30, width: "50%", height: 2, backgroundColor: c1 }} />
-          <div style={{ position: "absolute", right: 8, top: 36, width: "45%", height: 2, backgroundColor: "#ccc" }} />
-        </>
-      );
+      return (<>
+        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "22%", backgroundColor: c1 }} />
+        <div style={{ position: "absolute", left: 0, right: 0, top: "22%", bottom: 0, backgroundColor: c2 }} />
+        <div style={{ position: "absolute", left: 6, top: 28, width: "35%", height: 60, backgroundColor: "#fff", borderRadius: 4 }} />
+      </>);
     }
-    // corporate
-    return (
-      <>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "20%", backgroundColor: c1 }} />
-        <div style={{ position: "absolute", left: 10, top: 24, height: 5, borderRadius: 2, backgroundColor: c1, width: "35%" }} />
-        <div style={{ position: "absolute", left: 10, top: 34, width: "25%", height: 10, backgroundColor: c3, borderRadius: 3 }} />
-        <div style={{ position: "absolute", left: "40%", top: 34, width: "25%", height: 10, backgroundColor: c3, borderRadius: 3 }} />
-        <div style={{ position: "absolute", right: 10, top: 34, width: "25%", height: 10, backgroundColor: c3, borderRadius: 3 }} />
-      </>
-    );
+    return (<>
+      <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "20%", backgroundColor: c1 }} />
+      <div style={{ position: "absolute", left: 10, top: 24, height: 5, borderRadius: 2, backgroundColor: c1, width: "35%" }} />
+      <div style={{ position: "absolute", left: 10, top: 34, width: "25%", height: 10, backgroundColor: c3, borderRadius: 3 }} />
+    </>);
   };
 
+  const skills = aiData?.competences || formData.skills || [];
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen bg-background"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen bg-background">
       <nav className="flex items-center justify-between px-6 md:px-12 py-5">
-        <span className="text-2xl font-bold text-primary tracking-tight cursor-pointer" onClick={() => navigate("/")}>
-          CVExpress
-        </span>
+        <span className="text-2xl font-bold text-primary tracking-tight cursor-pointer" onClick={() => navigate("/")}>CVExpress</span>
+        <button onClick={() => navigate("/analyser")} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+          <Search className="w-4 h-4" /> Analyser une offre
+        </button>
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
-        {/* Template selector - horizontal scrollable */}
+        {/* Language Switcher */}
+        <div className="mb-4">
+          <LanguageSwitcher
+            aiData={originalAiData}
+            onTranslated={setAiData}
+            currentLang={currentLang}
+            onLangChange={setCurrentLang}
+          />
+        </div>
+
+        {/* Template selector */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-foreground mb-4">Choisis ton template</h2>
           <div className="flex gap-4 overflow-x-auto pb-4" style={{ scrollbarWidth: "thin" }}>
             {templates.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTemplate(t.key)}
-                className="flex-shrink-0 flex flex-col items-center gap-2 group"
-              >
-                <div
-                  className="relative rounded-lg overflow-hidden transition-all"
-                  style={{
-                    width: 80,
-                    height: 110,
-                    border: template === t.key ? "2.5px solid #00A651" : "2px solid #e5e5e5",
-                    boxShadow: template === t.key ? "0 0 0 2px rgba(0,166,81,0.2)" : "none",
-                    backgroundColor: t.colors[0] === "#fff" || t.colors[0] === "#fafafa" ? "#fafafa" : t.colors[0],
-                  }}
-                >
+              <button key={t.key} onClick={() => setTemplate(t.key)} className="flex-shrink-0 flex flex-col items-center gap-2 group">
+                <div className="relative rounded-lg overflow-hidden transition-all" style={{
+                  width: 80, height: 110,
+                  border: template === t.key ? "2.5px solid #00A651" : "2px solid #e5e5e5",
+                  boxShadow: template === t.key ? "0 0 0 2px rgba(0,166,81,0.2)" : "none",
+                  backgroundColor: t.colors[0] === "#fff" || t.colors[0] === "#fafafa" ? "#fafafa" : t.colors[0],
+                }}>
                   {renderMiniPreview(t)}
                   {template === t.key && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -175,24 +152,21 @@ const PreviewPage = () => {
                     </div>
                   )}
                 </div>
-                <span className={`text-xs font-medium ${template === t.key ? "text-primary" : "text-muted-foreground"}`}>
-                  {t.label}
-                </span>
+                <span className={`text-xs font-medium ${template === t.key ? "text-primary" : "text-muted-foreground"}`}>{t.label}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-3 mb-8 flex-wrap">
           <button onClick={handleDownload} className="btn-primary flex items-center justify-center gap-2 px-6 py-3">
-            <Download className="w-5 h-5" />
-            Télécharger PDF — 2000 FCFA
+            <Download className="w-5 h-5" /> Télécharger PDF — 2000 FCFA
           </button>
-          <button
-            onClick={() => navigate("/creer")}
-            className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium flex items-center justify-center gap-2"
-          >
+          <button onClick={() => setCoverLetterOpen(true)} className="btn-primary-sm flex items-center gap-2">
+            <Mail className="w-4 h-4" /> 💌 Générer ma lettre de motivation
+          </button>
+          <button onClick={() => navigate("/creer")} className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium flex items-center justify-center gap-2">
             <FileText className="w-4 h-4" /> Modifier les infos
           </button>
         </div>
@@ -202,7 +176,7 @@ const PreviewPage = () => {
           <div className="shadow-2xl rounded-lg overflow-hidden" style={{ width: 794 }}>
             <AnimatePresence mode="wait">
               <motion.div
-                key={template}
+                key={`${template}-${currentLang}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -220,7 +194,22 @@ const PreviewPage = () => {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Validation Section */}
+        <CVValidationSection
+          skills={skills}
+          validations={[]}
+          onRequestSent={() => {}}
+        />
       </div>
+
+      {/* Cover Letter Modal */}
+      <CoverLetterModal
+        open={coverLetterOpen}
+        onClose={() => setCoverLetterOpen(false)}
+        formData={formData}
+        aiData={aiData}
+      />
     </motion.div>
   );
 };

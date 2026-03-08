@@ -7,6 +7,8 @@ import StepPersonal from "@/components/form/StepPersonal";
 import StepEducation from "@/components/form/StepEducation";
 import StepExperience from "@/components/form/StepExperience";
 import StepSkills from "@/components/form/StepSkills";
+import CVScoreWidget from "@/components/CVScoreWidget";
+import VoiceMicButton from "@/components/VoiceMicButton";
 import { Check } from "lucide-react";
 
 const STEP_LABELS = ["Infos personnelles", "Formation", "Expérience", "Compétences"];
@@ -49,6 +51,29 @@ const FormPage = () => {
     navigate("/generation");
   };
 
+  const handleVoicePersonal = (data: Record<string, string>) => {
+    const updated = { ...form.personal };
+    if (data.prenom) updated.prenom = data.prenom;
+    if (data.nom) updated.nom = data.nom;
+    if (data.poste || data.poste_recherche) updated.poste = data.poste || data.poste_recherche;
+    if (data.email) updated.email = data.email;
+    if (data.telephone) updated.telephone = data.telephone;
+    if (data.ville) updated.ville = data.ville;
+    updatePersonal(updated);
+  };
+
+  const handleVoiceExperience = (data: Record<string, string>) => {
+    const newExp: Experience = {
+      id: crypto.randomUUID(),
+      poste: data.poste || "",
+      entreprise: data.entreprise || "",
+      dateDebut: data.dateDebut || "",
+      dateFin: data.dateFin || "",
+      description: data.description || "",
+    };
+    updateExperiences([...form.experiences, newExp]);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -61,6 +86,8 @@ const FormPage = () => {
           CVExpress
         </span>
       </nav>
+
+      <CVScoreWidget form={form} />
 
       <div className="max-w-2xl mx-auto px-6 pb-20">
         {/* Progress bar */}
@@ -90,15 +117,29 @@ const FormPage = () => {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {step === 0 && <StepPersonal data={form.personal} onChange={updatePersonal} />}
+            {step === 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div />
+                  <VoiceMicButton type="personal" onResult={handleVoicePersonal} />
+                </div>
+                <StepPersonal data={form.personal} onChange={updatePersonal} />
+              </div>
+            )}
             {step === 1 && <StepEducation diplomas={form.diplomas} onChange={updateDiplomas} />}
             {step === 2 && (
-              <StepExperience
-                experiences={form.experiences}
-                noExperience={form.noExperience}
-                onChange={updateExperiences}
-                onToggleNoExperience={setNoExperience}
-              />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div />
+                  <VoiceMicButton type="experience" onResult={handleVoiceExperience} />
+                </div>
+                <StepExperience
+                  experiences={form.experiences}
+                  noExperience={form.noExperience}
+                  onChange={updateExperiences}
+                  onToggleNoExperience={setNoExperience}
+                />
+              </div>
             )}
             {step === 3 && (
               <StepSkills

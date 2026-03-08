@@ -2,3 +2,15 @@ project_id = "equrdpncwmdvyyfahria"
 
 [functions.generate-cv]
 verify_jwt = false
+
+[functions.ai-voice-parse]
+verify_jwt = false
+
+[functions.ai-analyze-job]
+verify_jwt = false
+
+[functions.ai-cover-letter]
+verify_jwt = false
+
+[functions.ai-translate-cv]
+verify_jwt = false
