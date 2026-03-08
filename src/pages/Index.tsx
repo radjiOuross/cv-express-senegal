@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FileText, Sparkles, Layout, Download, Check, User, LayoutDashboard,
   Mic, Globe, Search, Shield, Mail, Palette, ArrowRight, Star,
-  SlidersHorizontal, Type, Camera, Zap, Lock, Upload, RefreshCw, Target, TrendingUp
+  SlidersHorizontal, Type, Camera, Zap, Lock, Upload, RefreshCw, Target, TrendingUp, Video
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import cvMockup1 from "@/assets/cv-mockup-1.png";
