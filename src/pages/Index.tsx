@@ -15,6 +15,7 @@ const steps = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <motion.div
