@@ -15,6 +15,7 @@ const STATUS_MESSAGES = [
 
 const LoadingPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [msgIndex, setMsgIndex] = useState(0);
 
   useEffect(() => {
