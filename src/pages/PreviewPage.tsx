@@ -44,11 +44,6 @@ const PreviewPage = () => {
   const resumeId = localStorage.getItem("cvexpress_rr_resume_id");
   const publicUrl = localStorage.getItem("cvexpress_rr_public_url");
 
-  if (!formData?.personal?.prenom) {
-    navigate("/creer");
-    return null;
-  }
-
   const handleChangeTemplate = useCallback(async (newTemplate: string) => {
     if (!resumeId || newTemplate === template) return;
     setChangingTemplate(true);
