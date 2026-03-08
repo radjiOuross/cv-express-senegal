@@ -23,6 +23,11 @@ const DashboardPage = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const [cvs, setCvs] = useState<CVRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewCount, setViewCount] = useState(0);
+  const [profileSlug, setProfileSlug] = useState("");
+  const [hasVideo, setHasVideo] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
