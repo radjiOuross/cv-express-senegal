@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FileText, Sparkles, Layout, Download, Check } from "lucide-react";
+import { FileText, Sparkles, Layout, Download, Check, User, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import cvMockup1 from "@/assets/cv-mockup-1.png";
 import cvMockup2 from "@/assets/cv-mockup-2.png";
 import cvMockup3 from "@/assets/cv-mockup-3.png";
