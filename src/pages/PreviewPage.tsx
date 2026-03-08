@@ -29,6 +29,7 @@ const PreviewPage = () => {
   const aiDataRaw = localStorage.getItem("cvexpress_ai_data");
   const originalAiData: AIData | null = aiDataRaw ? JSON.parse(aiDataRaw) : null;
   const [aiData, setAiData] = useState<AIData | null>(originalAiData);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     saveCustomization(customization);
@@ -38,8 +39,6 @@ const PreviewPage = () => {
     navigate("/creer");
     return null;
   }
-
-  const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
     if (downloading) return;
