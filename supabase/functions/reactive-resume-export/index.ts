@@ -162,7 +162,7 @@ function mapFormToRR(formData: any, aiData: any, template: string, customization
         hideIcons: false,
       },
       design: {
-        level: { icon: "", type: "filled" },
+        level: { icon: "", type: "circle" },
         colors: {
           primary: customization?.colors?.primary || "#00A651",
           text: "#1a1a1a",
