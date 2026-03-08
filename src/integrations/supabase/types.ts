@@ -23,6 +23,7 @@ export type Database = {
           id: string
           paid: boolean
           template: string
+          user_id: string | null
         }
         Insert: {
           ai_data?: Json | null
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           paid?: boolean
           template?: string
+          user_id?: string | null
         }
         Update: {
           ai_data?: Json | null
@@ -41,6 +43,7 @@ export type Database = {
           id?: string
           paid?: boolean
           template?: string
+          user_id?: string | null
         }
         Relationships: []
       }
