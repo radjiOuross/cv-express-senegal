@@ -104,30 +104,6 @@ const DashboardPage = () => {
     );
   }
 
-  useEffect(() => {
-    if (user && cvs.length > 0) {
-      const latestCv = cvs[0];
-      const slug = (latestCv as any).profile_slug;
-      setProfileSlug(slug || "");
-      setHasVideo(!!(latestCv as any).video_url);
-
-      // Get weekly views
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      supabase
-        .from("profile_views")
-        .select("*", { count: "exact", head: true })
-        .eq("cv_id", latestCv.id)
-        .gte("viewed_at", weekAgo.toISOString())
-        .then(({ count }) => setViewCount(count || 0));
-    }
-  }, [user, cvs]);
-
-  const copyProfileLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/profil/${profileSlug}`);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2000);
-  };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-background">
