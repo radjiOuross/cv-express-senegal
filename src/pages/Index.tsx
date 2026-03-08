@@ -61,6 +61,13 @@ const features = [
     badge: null,
   },
   {
+    icon: Video,
+    title: "CV Vidéo IA",
+    desc: "Génère un script pro avec l'IA, enregistre-toi avec téléprompteur et publie ta vidéo sur ton profil.",
+    color: "bg-red-500/10 text-red-400",
+    badge: "Nouveau",
+  },
+  {
     icon: LayoutDashboard,
     title: "Dashboard personnel",
     desc: "Connecte-toi avec Google ou Apple. Retrouve, modifie et gère tous tes CV depuis ton espace.",
